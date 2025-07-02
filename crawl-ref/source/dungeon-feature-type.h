@@ -273,6 +273,7 @@ enum dungeon_feature_type
     DNGN_UNKNOWN_PORTAL,
 
     DNGN_ABYSSAL_STAIR,
+    DNGN_ABYSSAL_STAIR_UP,
 #if TAG_MAJOR_VERSION == 34
     DNGN_BADLY_SEALED_DOOR,
 #endif

@@ -2503,11 +2503,8 @@ static void _check_sanctuary()
 
 static void _check_trapped()
 {
-    if (you.trapped)
-    {
-        do_trap_effects();
-        you.trapped = false;
-    }
+    // Malevolent force mechanics removed
+    you.trapped = false;
 }
 
 static void _update_golubria_traps(int dur)

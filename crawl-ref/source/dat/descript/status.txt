@@ -773,7 +773,7 @@ Enemies are magically translocated toward you. (This won't wake them up.)
 %%%%
 Zot status
 
-You have spent too much time in one branch, allowing the malevolent power of Zot
+You have spent too much time in one branch, allowing the power of Zot
 to notice you. If you spend the indicated number of turns in the branch without
 descending to a new floor, Zot will find you, causing permanent health damage.
 %%%%

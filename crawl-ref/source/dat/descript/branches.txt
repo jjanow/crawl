@@ -150,8 +150,8 @@ found from the third level onwards, and is more common at greater depths.
 Portals back to the dungeon are scattered throughout the Abyss, and are found
 more commonly at greater depths or while carrying the abyssal rune.
 
-Adventurers who linger in the Abyss will find themselves drawn irresistibly
-deeper. Killing monsters will warp the substance of the Abyss, eventually
+Adventurers who linger in the Abyss will find the substance of the place
+warping around them. Killing monsters will warp the substance of the Abyss, eventually
 generating a gateway out. Further persistence will wear holes in the Abyss,
 allowing descent into deeper layers. The Abyss remembers its visitors - once
 an adventurer has entered a level, future visits to the Abyss will always

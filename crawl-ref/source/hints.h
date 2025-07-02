@@ -136,7 +136,7 @@ enum hints_event_type
     HINT_ANIMATE_CORPSE_SKELETON,
 #endif
     HINT_SEEN_WEB,
-    HINT_MALEVOLENCE,
+
 
     HINT_ON_FIRE,
     HINT_EVENTS_NUM

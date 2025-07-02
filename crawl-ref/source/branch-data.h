@@ -232,7 +232,7 @@ const Branch branches[NUM_BRANCHES] =
       {} },
 #endif
 
-    { BRANCH_ABYSS, NUM_BRANCHES, -1, -1, 7, 24,
+    { BRANCH_ABYSS, NUM_BRANCHES, 1, 7, 7, 24,
       brflag::no_x_level_travel | brflag::no_map | brflag::no_items,
       DNGN_ENTER_ABYSS, DNGN_EXIT_ABYSS, DNGN_FLOOR, // can't get trapped in abyss
       "Abyss", "the Abyss", "Abyss",

@@ -38,9 +38,6 @@ enum class passive_t
     /// You detect the presence of items.
     detect_items,
 
-    /// You avoid explore-based traps.
-    avoid_traps,
-
     /// You have innate see invisible.
     sinv,
 

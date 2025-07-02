@@ -939,17 +939,20 @@ void floor_transition(dungeon_feature_type how,
     switch (you.where_are_you)
     {
     case BRANCH_ABYSS:
-        // There are no abyssal stairs that go up, so this whole case is only
-        // when going down.
-        // -- unless you're a rocketeer!
+        // Handle both up and down movement in the Abyss
         you.props.erase(ABYSS_SPAWNED_XP_EXIT_KEY);
-        if (old_level.depth > you.depth)
-            break;
         if (old_level.branch == BRANCH_ABYSS)
         {
-            mprf(MSGCH_BANISHMENT, "You plunge deeper into the Abyss.");
-            if (!you.runes[RUNE_ABYSSAL] && you.depth >= ABYSSAL_RUNE_MIN_LEVEL)
-                mpr("The abyssal rune of Zot can be found at this depth.");
+            if (old_level.depth > you.depth)
+            {
+                mprf(MSGCH_BANISHMENT, "You plunge deeper into the Abyss.");
+                if (!you.runes[RUNE_ABYSSAL] && you.depth >= ABYSSAL_RUNE_MIN_LEVEL)
+                    mpr("The abyssal rune of Zot can be found at this depth.");
+            }
+            else if (old_level.depth < you.depth)
+            {
+                mprf(MSGCH_BANISHMENT, "You climb higher in the Abyss.");
+            }
             break;
         }
         if (!forced)
@@ -1249,6 +1252,16 @@ level_id stair_destination(dungeon_feature_type feat, const string &dst,
     case DNGN_ABYSSAL_STAIR:
         ASSERT(player_in_branch(BRANCH_ABYSS));
         push_features_to_abyss();
+    case DNGN_ABYSSAL_STAIR_UP:
+        ASSERT(player_in_branch(BRANCH_ABYSS));
+        push_features_to_abyss();
+        if (you.depth <= 1)
+        {
+            if (you.wizard && !for_real)
+                return level_id();
+            die("upstairs from top of the Abyss");
+        }
+        return level_id(you.where_are_you, you.depth - 1);
     case DNGN_ESCAPE_HATCH_DOWN:
     case DNGN_STONE_STAIRS_DOWN_I:
     case DNGN_STONE_STAIRS_DOWN_II:

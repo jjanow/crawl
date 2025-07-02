@@ -188,6 +188,7 @@ static void _abyss_fixup_vault(const vault_placement *vp)
         if (feat_is_stair(feat)
             && feat != DNGN_EXIT_ABYSS
             && feat != DNGN_ABYSSAL_STAIR
+            && feat != DNGN_ABYSSAL_STAIR_UP
             && !feat_is_portal_entrance(feat))
         {
             env.grid(p) = DNGN_FLOOR;
@@ -422,14 +423,15 @@ void banished(const string &who, const int power)
 
     if (player_in_branch(BRANCH_ABYSS))
     {
-        if (level_id::current().depth < brdepth[BRANCH_ABYSS])
-            down_stairs(DNGN_ABYSSAL_STAIR);
-        else
-        {
+        // Removed forced descent - players should only go deeper if they choose to
+        // if (level_id::current().depth < brdepth[BRANCH_ABYSS])
+        //     down_stairs(DNGN_ABYSSAL_STAIR);
+        // else
+        // {
             // On Abyss:$ we can't go deeper; cause a shift to a new area
             mprf(MSGCH_BANISHMENT, "You are banished to a different region of the Abyss.");
             abyss_teleport();
-        }
+        // }
         return;
     }
 
@@ -1278,6 +1280,7 @@ static void _update_abyss_terrain(const coord_def &p,
         case DNGN_RUNELIGHT:
         case DNGN_EXIT_ABYSS:
         case DNGN_ABYSSAL_STAIR:
+        case DNGN_ABYSSAL_STAIR_UP:
             return;
         default:
             break;
@@ -1420,6 +1423,11 @@ static void _abyss_apply_terrain(const map_bitmask &abyss_genlevel_mask,
         level_id::current().depth < brdepth[BRANCH_ABYSS]
         && _abyss_check_place_feat(p, 1750, nullptr, nullptr,
                                    DNGN_ABYSSAL_STAIR,
+                                   abyss_genlevel_mask)
+        ||
+        level_id::current().depth > 1
+        && _abyss_check_place_feat(p, 1750, nullptr, nullptr,
+                                   DNGN_ABYSSAL_STAIR_UP,
                                    abyss_genlevel_mask);
     }
     if (ii)
@@ -1748,25 +1756,19 @@ void abyss_morph()
 //   of about 6.6%/5.5%/4.5%/3.7%.
 // - Characters at XL 27 have chances for getting pulled from A:1/A:2/A:3/A:4
 //   of about 31%/28.5%/26.3%/24.1%.
-static bool _abyss_force_descent()
-{
-    const int depth = level_id::current().depth;
-    const int xl_factor = max(0, you.experience_level - depth);
-    return x_chance_in_y(xl_factor * xl_factor, 729 * 3);
-}
+// Removed forced descent - players should only go deeper if they choose to
+// static bool _abyss_force_descent()
+// {
+//     const int depth = level_id::current().depth;
+//     const int xl_factor = max(0, you.experience_level - depth);
+//     return x_chance_in_y(xl_factor * xl_factor, 729 * 3);
+// }
 
 void abyss_teleport(bool wizard_tele)
 {
+    UNUSED(wizard_tele);
     xom_abyss_feature_amusement_check xomcheck;
     dprf(DIAG_ABYSS, "New area Abyss teleport.");
-
-    if (level_id::current().depth < brdepth[BRANCH_ABYSS]
-        && _abyss_force_descent() && !wizard_tele)
-    {
-        down_stairs(DNGN_ABYSSAL_STAIR);
-        more();
-        return;
-    }
 
     mprf(MSGCH_BANISHMENT, "You are suddenly pulled into a different region of"
         " the Abyss!");

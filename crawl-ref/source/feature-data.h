@@ -729,6 +729,13 @@ FOUNTAIN(DNGN_RUNELIGHT, "runelight", "runelight", ETC_DISJUNCTION),
 },
 
 {
+    DNGN_ABYSSAL_STAIR_UP, "gateway leading higher in the Abyss", "abyssal_stair_up",
+    DCHAR_STAIRS_UP, NUM_DCHAR_TYPES,
+    COLOUR_AND_MAP(LIGHTCYAN),
+    FFT_NONE, MF_STAIR_BRANCH,
+},
+
+{
     DNGN_BINDING_SIGIL, "a binding sigil", "binding_sigil",
     DCHAR_TRAP, NUM_DCHAR_TYPES,
     COLOUR_AND_MAP(RED),

@@ -211,7 +211,6 @@ static const vector<god_passive> god_passives[] =
         {  1, passive_t::identify_items },
         {  2, passive_t::sinv},
         {  3, passive_t::clarity },
-        {  4, passive_t::avoid_traps },
         {  4, passive_t::scrying },
     },
 

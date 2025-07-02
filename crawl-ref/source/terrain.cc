@@ -128,7 +128,8 @@ bool feat_is_staircase(dungeon_feature_type feat)
 
     return feat_is_branch_entrance(feat)
            || feat_is_branch_exit(feat)
-           || feat == DNGN_ABYSSAL_STAIR;
+           || feat == DNGN_ABYSSAL_STAIR
+           || feat == DNGN_ABYSSAL_STAIR_UP;
 }
 
 /** Is this the exit from a sub-branch of Hell?
@@ -300,6 +301,7 @@ bool feat_is_gate(dungeon_feature_type feat)
     case DNGN_EXIT_THROUGH_ABYSS:
     case DNGN_EXIT_ABYSS:
     case DNGN_ABYSSAL_STAIR:
+    case DNGN_ABYSSAL_STAIR_UP:
     case DNGN_ENTER_PANDEMONIUM:
     case DNGN_EXIT_PANDEMONIUM:
     case DNGN_TRANSIT_PANDEMONIUM:

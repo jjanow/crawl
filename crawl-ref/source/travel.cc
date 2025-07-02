@@ -3437,6 +3437,9 @@ level_id level_id::get_next_level_id(const coord_def &pos)
     case DNGN_ABYSSAL_STAIR:
         id.depth++;
         break;
+    case DNGN_ABYSSAL_STAIR_UP:
+        id.depth--;
+        break;
     case DNGN_STONE_STAIRS_UP_I:     case DNGN_STONE_STAIRS_UP_II:
     case DNGN_STONE_STAIRS_UP_III:   case DNGN_ESCAPE_HATCH_UP:
         id.depth--;

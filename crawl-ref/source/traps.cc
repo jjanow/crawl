@@ -23,7 +23,7 @@
 #include "describe.h"
 #include "dungeon.h"
 #include "english.h"
-#include "god-passive.h" // passive_t::avoid_traps
+
 #include "hints.h"
 #include "item-prop.h"
 #include "items.h"
@@ -1304,107 +1304,7 @@ static bool _is_valid_shaft_effect_level()
                 && brdepth[place.branch] - place.depth == 1);
 }
 
-/***
- * The player rolled a new tile, see if they deserve to be trapped.
- */
-void roll_trap_effects()
-{
-    int trap_rate = trap_rate_for_place();
 
-    you.trapped = you.num_turns
-        && env.density > 0 // can happen with builder in debug state
-        && (you.trapped || x_chance_in_y(trap_rate, 9 * env.density));
-}
-
-static string _malev_msg()
-{
-    return make_stringf("A malevolent force fills %s...",
-                        branches[you.where_are_you].longname);
-}
-
-static void _print_malev()
-{
-    mpr(_malev_msg());
-}
-
-/**
- * Separate from roll_trap_effects so the trap triggers when crawl is in an
- * appropriate state
- */
-void do_trap_effects()
-{
-    if (crawl_state.game_is_descent())
-        return;
-
-    // Try to shaft, teleport, or alarm the player.
-
-    // We figure out which possibilities are allowed before picking which happens
-    // so that the overall chance of being trapped doesn't depend on which
-    // possibilities are allowed.
-
-    // Teleport effects are allowed everywhere, no need to check
-    vector<trap_type> available_traps = { TRAP_TELEPORT };
-    // Don't shaft the player when shafts aren't allowed in the location or when
-    //  it would be into a dangerous end.
-    if (_is_valid_shaft_effect_level() && you.shaftable())
-        available_traps.push_back(TRAP_SHAFT);
-    // No alarms on the first 3 floors
-    if (env.absdepth0 > 3)
-        available_traps.push_back(TRAP_ALARM);
-
-    switch (*random_iterator(available_traps))
-    {
-        case TRAP_SHAFT:
-            dprf("Attempting to shaft player.");
-            _print_malev();
-            if (have_passive(passive_t::avoid_traps))
-            {
-                simple_god_message(" reveals a hidden shaft just before you would have fallen in.");
-                return;
-            }
-            if (you.do_shaft())
-                set_shafted();
-            break;
-
-        case TRAP_ALARM:
-            // Alarm effect alarms are always noisy, even if the player is
-            // silenced, to avoid "travel only while silenced" behaviour.
-            // XXX: improve messaging to make it clear there's a wail outside of the
-            // player's silence
-            _print_malev();
-            if (have_passive(passive_t::avoid_traps))
-            {
-                simple_god_message(" reveals an alarm trap just before you would have tripped it.");
-                return;
-            }
-            mpr("With a horrendous wail, an alarm goes off!");
-            fake_noisy(40, you.pos());
-            you.sentinel_mark(true);
-            break;
-
-        case TRAP_TELEPORT:
-        {
-            string msg = make_stringf("%s and a teleportation trap "
-                                      "spontaneously manifests!",
-                                      _malev_msg().c_str());
-            if (have_passive(passive_t::avoid_traps))
-            {
-                mpr(msg);
-                simple_god_message(" warns you in time for you to avoid it.");
-                return;
-            }
-            you_teleport_now(false, true, msg);
-            break;
-        }
-
-        // Other cases shouldn't be possible, but having a default here quiets
-        // compiler warnings
-        default:
-            break;
-    }
-
-    learned_something_new(HINT_MALEVOLENCE);
-}
 
 level_id generic_shaft_dest(level_id place)
 {

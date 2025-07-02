@@ -828,13 +828,8 @@ void PasswallDelay::finish()
     you.update_beholders();
     you.update_fearmongers();
 
-    // in addition to missing player_reacts we miss world_reacts until after
-    // we act, missing out on a trap.
-    if (you.trapped)
-    {
-        do_trap_effects();
-        you.trapped = false;
-    }
+    // Malevolent force mechanics removed
+    you.trapped = false;
 }
 
 void ShaftSelfDelay::finish()

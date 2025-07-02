@@ -34,7 +34,7 @@
 #include "spl-transloc.h" // wizard_blink
 #include "stairs.h" // down_stairs
 #include "state.h"
-#include "traps.h" // do_trap_effects
+
 #include "wizard-option-type.h"
 #include "wiz-dgn.h"
 #include "wiz-dump.h"
@@ -82,7 +82,7 @@ static void _do_wizard_command(int wiz_command)
     case 'D': wizard_detect_creatures(); break;
     case CONTROL('D'): wizard_edit_durations(); break;
 
-    case 'e': do_trap_effects(); break;
+    case 'e': mpr("Malevolent force mechanics removed"); break;
     case 'E': wizard_freeze_time(); break;
     case CONTROL('E'): debug_dump_levgen(); break;
 
