@@ -303,8 +303,13 @@ static void _give_player_experience(int experience, killer_type killer,
     curr_xp_info += xp_delta;
     curr_xp_info.assert_validity();
 
+    // Display XP gained message for player kills
+    if (exp_gain > 0 && (killer == KILL_YOU || killer == KILL_YOU_MISSILE || killer == KILL_YOU_CONF))
+    {
+        mprf(MSGCH_INTRINSIC_GAIN, "You gain %d experience points.", exp_gain);
+    }
     // Give a message for monsters dying out of sight.
-    if (exp_gain > 0 && !was_visible)
+    else if (exp_gain > 0 && !was_visible)
         mpr("You feel a bit more experienced.");
 }
 
