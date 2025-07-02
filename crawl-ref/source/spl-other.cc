@@ -16,10 +16,12 @@
 #include "god-companions.h"
 #include "libutil.h"
 #include "message.h"
+#include "mon-behv.h"
 #include "mon-death.h"
 #include "mon-place.h"
 #include "mon-util.h"
 #include "movement.h" // passwall
+#include "output.h"
 #include "place.h"
 #include "potion.h"
 #include "religion.h"
@@ -402,11 +404,65 @@ spret cast_passwall(const coord_def& c, int pow, bool fail)
     }
     else if (p.check_moveto())
     {
-        start_delay<PasswallDelay>(p.actual_walls() + 1, p.actual_dest);
-
+        // Pass through wall immediately without delay
+        mpr("You finish merging with the rock.");
+        
         // Give bonus AC while moving through the wall.
         you.props[PASSWALL_ARMOUR_KEY].get_int() = 5 + div_rand_round(pow, 10);
         you.redraw_armour_class = true;
+
+        // Move to destination immediately
+        coord_def dest = p.actual_dest;
+        if (dest.x != 0 && dest.y != 0)
+        {
+            switch (env.grid(dest))
+            {
+            default:
+                if (!you.is_habitable(dest))
+                {
+                    mpr("...yet there is something new on the other side. "
+                        "You quickly turn back.");
+                    redraw_screen();
+                    update_screen();
+                    return spret::success;
+                }
+                break;
+
+            case DNGN_CLOSED_DOOR:      // open the door
+            case DNGN_CLOSED_CLEAR_DOOR:
+            case DNGN_RUNED_DOOR:
+            case DNGN_RUNED_CLEAR_DOOR:
+                // Once opened, former runed doors become normal doors.
+                dgn_open_door(dest);
+                break;
+            }
+
+            // Move any monsters out of the way.
+            if (monster* m = monster_at(dest))
+            {
+                // One square only, this isn't a tloc spell!
+                if (!m->shift())
+                {
+                    mpr("...and sense your way blocked. You quickly turn back.");
+                    redraw_screen();
+                    update_screen();
+                    return spret::success;
+                }
+
+                move_player_to_grid(dest, false);
+
+                // Wake the monster if it's asleep.
+                if (m)
+                    behaviour_event(m, ME_ALERT, &you);
+            }
+            else
+                move_player_to_grid(dest, false);
+
+            // Cleanup after movement
+            you.update_beholders();
+            you.update_fearmongers();
+            you.trapped = false;
+        }
 
         return spret::success;
     }

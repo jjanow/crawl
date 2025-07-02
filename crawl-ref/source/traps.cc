@@ -1286,24 +1286,6 @@ void set_shafted()
     _shafted_in(branches[you.where_are_you]) = true;
 }
 
-/**
- * Can we force shaft the player from this level?
- *
- * @returns true if we can.
- */
-static bool _is_valid_shaft_effect_level()
-{
-    const level_id place = level_id::current();
-    const Branch &branch = branches[place.branch];
-
-    // Don't shaft the player when we can't, or when we already did once this game
-    // in this branch, or when it would be into a dangerous end.
-    return is_valid_shaft_level()
-           && !_shafted_in(branch)
-           && !(branch.branch_flags & brflag::dangerous_end
-                && brdepth[place.branch] - place.depth == 1);
-}
-
 
 
 level_id generic_shaft_dest(level_id place)

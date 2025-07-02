@@ -971,6 +971,13 @@ spret cast_smiting(int pow, monster* mons, bool fail)
         return spret::abort;
     }
 
+    // Invisible players cannot be smited
+    if (you.invisible())
+    {
+        mpr("You cannot smite while invisible.");
+        return spret::abort;
+    }
+
     fail_check();
 
     god_conduct_trigger conducts[3];
