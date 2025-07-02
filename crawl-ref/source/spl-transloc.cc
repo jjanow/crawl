@@ -154,8 +154,6 @@ void uncontrolled_blink(bool override_stasis, int max_distance)
     move_player_to_grid(target, false);
     _place_tloc_cloud(origin);
     stop_delay(true);
-
-    crawl_state.potential_pursuers.clear();
 }
 
 spret spider_jump()
@@ -209,8 +207,6 @@ spret spider_jump()
     move_player_to_grid(target, false);
     if (!cell_is_solid(origin))
         place_cloud(CLOUD_DUST, origin, 2 + random2(3), &you);
-
-    crawl_state.potential_pursuers.clear();
 
     you.increase_duration(DUR_BLINK_COOLDOWN, random_range(2, 5));
     place_cloud(CLOUD_DUST, origin, 2 + random2(3), &you);
@@ -1184,8 +1180,6 @@ static bool _teleport_player(bool wizard_tele, bool teleportitis,
         large_change = _real_teleport_cleanup(old_pos, newpos);
     }
 
-    crawl_state.potential_pursuers.clear();
-
     _handle_teleport_update(large_change, old_pos);
     return !wizard_tele;
 }
@@ -1279,7 +1273,6 @@ static bool hostile_teleport_player()
 
         interrupt_activity(activity_interrupt::teleport);
         large_change = _real_teleport_cleanup(oldpos, newpos);
-        crawl_state.potential_pursuers.clear();
         _handle_teleport_update(large_change, oldpos);
         did_teleport = true;
     }

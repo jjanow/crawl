@@ -1022,8 +1022,7 @@ static bool _rare_hints_event(hints_event_type event)
     case HINT_CHOOSE_STAT:
     case HINT_AUTO_EXCLUSION:
     case HINT_MALEVOLENCE:
-    case HINT_OPPORTUNITY_ATTACK:
-        return true;
+
     default:
         return false;
     }
@@ -1307,9 +1306,7 @@ void learned_something_new(hints_event_type seen_what, coord_def gc)
         print_hint("HINT_MALEVOLENCE");
         break;
 
-    case HINT_OPPORTUNITY_ATTACK:
-        print_hint("HINT_OPPORTUNITY_ATTACK");
-        break;
+
 
     case HINT_YOU_ENCHANTED:
         print_hint("HINT_YOU_ENCHANTED");
