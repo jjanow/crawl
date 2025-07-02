@@ -327,6 +327,8 @@ static void _post_init(bool newc)
     you.redraw_magic_points = true;
     you.redraw_armour_class = true;
     you.redraw_evasion      = true;
+    you.redraw_stealth      = true;
+    you.redraw_wrath        = true;
     you.redraw_experience   = true;
     you.redraw_noise        = true;
     you.wield_change        = true;

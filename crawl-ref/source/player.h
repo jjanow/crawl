@@ -446,6 +446,8 @@ public:
     bool redraw_experience;
     bool redraw_armour_class;
     bool redraw_evasion;
+    bool redraw_stealth;
+    bool redraw_wrath;
     bool redraw_status_lights;
 
     colour_t flash_colour;

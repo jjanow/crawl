@@ -2435,7 +2435,7 @@ Branches, Environment
 * Shadows and wights no longer appear in the Crypt spawn list, replaced with
   flying skulls, necromancers, and wraiths.
 * Spider is now quiet.
-* The malevolent force of Zot will find players that tarry far too long in one
+
   place.
 * Gauntlet monsters now generate awake, and those other than the minotaur
   don't pick up loot.

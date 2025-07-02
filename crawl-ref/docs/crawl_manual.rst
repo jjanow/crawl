@@ -413,7 +413,7 @@ If there is no door in the indicated space, both Ctrl-direction and
 is apparently nothing there, you will still attack it, just in case there's
 something invisible lurking around.
 
-The malevolent forces of Zot will attempt to thwart your progress through the
+
 dungeon, and will occasionally manifest traps to force you into dangerous
 situations. Some traps are visible in advance and can be triggered by monsters
 to unleash their effects on you.

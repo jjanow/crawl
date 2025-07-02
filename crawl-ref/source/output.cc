@@ -1081,6 +1081,34 @@ static void _print_stats_ev(int x, int y)
     you.redraw_evasion = false;
 }
 
+static void _print_stats_stealth(int x, int y)
+{
+    CGOTOXY(x+4, y, GOTO_STAT);
+    
+    const int stealth = player_stealth();
+    textcolour(HUD_VALUE_COLOUR);
+    CPRINTF("%3d", stealth);
+    
+    you.redraw_stealth = false;
+}
+
+static void _print_stats_wrath(int x, int y)
+{
+    CGOTOXY(x+4, y, GOTO_STAT);
+    
+    int total_wrath = 0;
+    for (god_iterator it; it; ++it)
+    {
+        if (active_penance(*it))
+            total_wrath += you.penance[*it];
+    }
+    
+    textcolour(total_wrath > 0 ? RED : HUD_VALUE_COLOUR);
+    CPRINTF("%3d", total_wrath);
+    
+    you.redraw_wrath = false;
+}
+
 /**
  * Get the appropriate colour for the UI text describing the given weapon.
  *
@@ -1487,6 +1515,7 @@ void print_stats()
 #endif
     int ac_pos = 5;
     int ev_pos = ac_pos + 1;
+    int sh_pos = ac_pos + 2;
 
     cursor_control coff(false);
     textcolour(LIGHTGREY);
@@ -1533,6 +1562,12 @@ void print_stats()
         _print_stats_ac(1, ac_pos - rows_hidden);
     if (you.redraw_evasion)
         _print_stats_ev(1, ev_pos - rows_hidden);
+
+    if (you.redraw_stealth)
+        _print_stats_stealth(1, sh_pos - rows_hidden);
+
+    if (you.redraw_wrath)
+        _print_stats_wrath(1, sh_pos + 1 - rows_hidden);
 
     for (int i = 0; i < NUM_STATS; ++i)
         if (you.redraw_stats[i])
@@ -1634,6 +1669,8 @@ void draw_border()
     CGOTOXY(1, ac_pos, GOTO_STAT); CPRINTF("AC:");
     CGOTOXY(1, ev_pos, GOTO_STAT); CPRINTF("EV:");
     CGOTOXY(1, sh_pos, GOTO_STAT); CPRINTF("SH:");
+    CGOTOXY(1, sh_pos + 1, GOTO_STAT); CPRINTF("Stl:");
+    CGOTOXY(1, sh_pos + 2, GOTO_STAT); CPRINTF("Wrth:");
 
     CGOTOXY(19, str_pos, GOTO_STAT); CPRINTF("Str:");
     CGOTOXY(19, int_pos, GOTO_STAT); CPRINTF("Int:");
@@ -1684,6 +1721,8 @@ void redraw_screen(bool show_updates)
     you.redraw_magic_points  = true;
     you.redraw_armour_class  = true;
     you.redraw_evasion       = true;
+    you.redraw_stealth       = true;
+    you.redraw_wrath         = true;
     you.redraw_experience    = true;
     you.wield_change         = true;
     you.redraw_quiver        = true;

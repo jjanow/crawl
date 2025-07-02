@@ -5468,6 +5468,8 @@ player::player()
     redraw_experience    = false;
     redraw_armour_class  = false;
     redraw_evasion       = false;
+    redraw_stealth       = false;
+    redraw_wrath         = false;
     redraw_title         = false;
 
     flash_colour        = BLACK;

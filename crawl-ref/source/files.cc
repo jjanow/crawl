@@ -155,6 +155,8 @@ static void _redraw_all()
     you.redraw_stats.init(true);
     you.redraw_armour_class  = true;
     you.redraw_evasion       = true;
+    you.redraw_stealth       = true;
+    you.redraw_wrath         = true;
     you.redraw_experience    = true;
     you.redraw_status_lights = true;
 }

@@ -1624,6 +1624,8 @@ LUAFN(_crawl_redraw_stats)
     you.redraw_experience    = true;
     you.redraw_armour_class  = true;
     you.redraw_evasion       = true;
+    you.redraw_stealth       = true;
+    you.redraw_wrath         = true;
     you.redraw_status_lights = true;
     quiver::set_needs_redraw();
 
