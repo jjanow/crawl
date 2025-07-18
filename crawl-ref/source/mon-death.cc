@@ -307,9 +307,11 @@ static void _give_player_experience(int experience, killer_type killer,
     curr_xp_info += xp_delta;
     curr_xp_info.assert_validity();
 
-    // Give a message for monsters dying out of sight.
-    if (exp_gain > 0 && !was_visible)
-        mpr("You feel a bit more experienced.");
+    // Inform the player exactly how much XP was earned for this kill, whether it was
+    // done directly or by a friendly ally. Display the message for both visible and
+    // out-of-sight kills so that all experience gains are transparent.
+    if (exp_gain > 0)
+        mprf(MSGCH_RECOVERY, "You gain %u XP.", exp_gain);
 }
 
 /**
