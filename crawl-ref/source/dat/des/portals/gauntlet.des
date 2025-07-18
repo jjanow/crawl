@@ -9,7 +9,7 @@
 : crawl_require("dlua/gauntlet.lua")
 {{
 function gauntlet_portal(e)
-  local timeout_turns = crawl.random_range(400, 600)
+  local timeout_turns = 999999999 -- never expire
 
   local messager =
     timed_msg {

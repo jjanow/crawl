@@ -46,7 +46,7 @@
 -- # General setup and design functions: (head to line 382 for the maps)
 
 function volcano_portal (e)
-    local timeout_turns = crawl.random_range(600, 800)
+    local timeout_turns = 999999999 -- never expire
 
     local messager =
       timed_msg {
