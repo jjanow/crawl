@@ -2498,6 +2498,40 @@ static vector<formatted_string> _get_overview_stats()
         entry.clear();
     }
 
+    // Wrath stat: display remaining god wrath (penance)
+    {
+        int total_penance = 0;
+        std::vector<std::pair<god_type,int>> wrath_gods;
+        for (god_iterator it; it; ++it)
+        {
+            if (you.penance[*it] > 0)
+            {
+                total_penance += you.penance[*it];
+                wrath_gods.push_back({*it, you.penance[*it]});
+            }
+        }
+        if (total_penance > 0)
+        {
+            entry.textcolour(HUD_CAPTION_COLOUR);
+            entry.cprintf("Wrath:  ");
+
+            entry.textcolour(HUD_VALUE_COLOUR);
+            if (wrath_gods.size() == 1)
+            {
+                entry.cprintf("%s (%d)",
+                              god_name(wrath_gods[0].first).c_str(),
+                              wrath_gods[0].second);
+            }
+            else
+            {
+                entry.cprintf("%d", total_penance);
+            }
+
+            cols.add_formatted(3, entry.to_colour_string(), false);
+            entry.clear();
+        }
+    }
+
     return cols.formatted_lines();
 }
 
