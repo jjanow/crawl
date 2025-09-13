@@ -266,6 +266,7 @@ static void _give_player_experience(int experience, killer_type killer,
                                     bool pet_kill, bool was_visible,
                                     xp_tracking_type xp_tracking)
 {
+    (void) was_visible; // Suppress unused parameter warning
     if (experience <= 0 || crawl_state.game_is_arena())
         return;
 

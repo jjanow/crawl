@@ -1673,11 +1673,11 @@ static void _take_stairs(bool down)
     {
         tag_followers(); // Only those beside us right now can follow.
         if (down)
-            start_delay<DescendingStairsDelay>(1);
+            start_delay<DescendingStairsDelay>(0);
         else if (crawl_state.game_is_descent())
             up_stairs();
         else
-            start_delay<AscendingStairsDelay>(1);
+            start_delay<AscendingStairsDelay>(0);
         id_floor_items();
     }
 }
