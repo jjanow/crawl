@@ -1270,12 +1270,12 @@ static item_def* _item_swap_prompt(const vector<item_def*>& candidates)
 static bool _is_slow_equip(const item_def& item)
 {
     if (item.base_type == OBJ_ARMOUR)
-        return true;
+        return get_armour_slot(item) == SLOT_BODY_ARMOUR;
     else if (is_weapon(item))
         return you.has_mutation(MUT_SLOW_WIELD);
-
-    // Probably nothing reaches this?
-    return true;
+    
+    // All other items (jewelry, etc.) are now instant
+    return false;
 }
 
 /**
