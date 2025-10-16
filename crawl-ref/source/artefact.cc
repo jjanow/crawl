@@ -1141,8 +1141,6 @@ static void _get_randart_properties(const item_def &item,
     // We'll potentially add up to 2 bad properties, also considering any fixed
     // bad properties.
     int bad = 0;
-    if (fixed_bad < 2)
-        bad = binomial(2 - fixed_bad,  21);
 
     // For each point of quality and for each bad property added, we'll add or
     // enhance one good property.
