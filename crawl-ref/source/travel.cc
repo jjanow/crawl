@@ -3433,10 +3433,7 @@ void start_explore(bool grab_items)
 
 void do_explore_cmd()
 {
-    if (you.berserk())
-        mpr("Calm down first, please.");
-    else                        // Start exploring
-        start_explore(Options.explore_greedy);
+    start_explore(Options.explore_greedy);
 }
 
 //////////////////////////////////////////////////////////////////////////
