@@ -2183,8 +2183,7 @@ Summons one or more water elementals.
 %%%%
 Swiftness spell
 
-Calls forth winds to greatly increase the caster's movement speed. After the
-effect ends, the caster's movements will be sluggish for a time.
+Calls forth winds to greatly increase the caster's movement speed.
 %%%%
 Symbol of Torment spell
 

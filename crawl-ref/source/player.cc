@@ -1770,14 +1770,10 @@ int player_movement_speed(bool check_terrain, bool temp)
     if (temp && you.duration[DUR_FROZEN])
         mv = div_rand_round(mv * 3, 2);
 
-    if (temp && you.duration[DUR_SWIFTNESS] > 0)
+    if (temp && you.duration[DUR_SWIFTNESS] > 0
+        && you.attribute[ATTR_SWIFTNESS] > 0)
     {
-        if (you.attribute[ATTR_SWIFTNESS] > 0)
-          mv = div_rand_round(3*mv, 4);
-        else if (mv >= 8)
-          mv = div_rand_round(3*mv, 2);
-        else if (mv == 7)
-          mv = div_rand_round(7*6, 5); // balance for the cap at 6
+        mv = div_rand_round(3*mv, 4);
     }
 
     // We'll use the old value of six as a minimum, with haste this could
@@ -3287,9 +3283,7 @@ static void _display_movement_speed()
 
     const bool fly    = you.airborne();
     const bool swift  = (you.duration[DUR_SWIFTNESS] > 0
-                         && you.attribute[ATTR_SWIFTNESS] >= 0);
-    const bool antiswift = (you.duration[DUR_SWIFTNESS] > 0
-                            && you.attribute[ATTR_SWIFTNESS] < 0);
+                         && you.attribute[ATTR_SWIFTNESS] > 0);
 
     _display_char_status(move_cost, "Your %s speed is %s%s%s",
           // order is important for these:
@@ -3298,14 +3292,10 @@ static void _display_movement_speed()
           (fly)     ? "flying"
                     : "movement",
 
-          (swift) ? "aided by the wind" :
-          (antiswift) ? "hindered by the wind" : "",
+          (swift) ? "aided by the wind" : "",
 
           (swift) ? ((move_cost >= 10) ? ", but still "
-                                                 : " and ") :
-          (antiswift) ? ((move_cost <= 10) ? ", but still "
-                                                     : " and ")
-                            : "",
+                                                 : " and ") : "",
 
           (move_cost <   8) ? "very quick" :
           (move_cost <  10) ? "quick" :

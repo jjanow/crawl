@@ -740,22 +740,11 @@ static void _decrement_durations()
 
     _decrement_transform_duration(delay);
 
-    if (you.attribute[ATTR_SWIFTNESS] >= 0)
+    if (you.duration[DUR_SWIFTNESS] > 0)
     {
         if (_decrement_a_duration(DUR_SWIFTNESS, delay,
-                                  "You feel sluggish.", coinflip(),
+                                  "You no longer feel quick.", coinflip(),
                                   "You start to feel a little slower."))
-        {
-            // Start anti-swiftness.
-            you.duration[DUR_SWIFTNESS] = you.attribute[ATTR_SWIFTNESS];
-            you.attribute[ATTR_SWIFTNESS] = -1;
-        }
-    }
-    else
-    {
-        if (_decrement_a_duration(DUR_SWIFTNESS, delay,
-                                  "You no longer feel sluggish.", coinflip(),
-                                  "You start to feel a little faster."))
         {
             you.attribute[ATTR_SWIFTNESS] = 0;
         }

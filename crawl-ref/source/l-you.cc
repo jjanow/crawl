@@ -401,12 +401,12 @@ LUARET1(you_berserk, boolean, you.berserk())
  */
 LUARET1(you_confused, boolean, you.confused())
 
-/*** Are you currently +Swift or -Swift?
- * If you have neither, returns 0. If you are +Swift, +1, and -Swift, -1.
- * @treturn int Swift level
+/*** Are you currently Swift?
+ * If you have Swiftness active, returns 1, otherwise returns 0.
+ * @treturn int Swift level (1 if swift, 0 otherwise)
  * @function swift
  */
-LUARET1(you_swift, number, you.duration[DUR_SWIFTNESS] ? ((you.attribute[ATTR_SWIFTNESS] >= 0) ? 1 : -1) : 0)
+LUARET1(you_swift, number, (you.duration[DUR_SWIFTNESS] > 0 && you.attribute[ATTR_SWIFTNESS] > 0) ? 1 : 0)
 
 /*** What was the loudest noise you heard in the last turn?
  * Returns a number from [0, 1000], representing the current noise bar.

@@ -1109,8 +1109,8 @@ command_type travel()
             if (you.duration[type] == 0)
                 continue;
 
-            // Only rest off the bad part of Swiftness
-            if (type == DUR_SWIFTNESS && you.attribute[ATTR_SWIFTNESS] > 0)
+            // Don't rest off Swiftness
+            if (type == DUR_SWIFTNESS)
                 continue;
 
             // Only try to rest off transformations when this is both possible
