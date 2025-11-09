@@ -321,6 +321,15 @@ static item_def _item_from_string(string s)
             make_item_randart(ret, true);
 
             _apply_randart_properties(ret, base_name, s.substr(end));
+            
+            // Artifacts must have at least +2 bonus.
+            if (is_artefact(ret))
+            {
+                if (ret.base_type == OBJ_WEAPONS || ret.base_type == OBJ_ARMOUR)
+                    ret.plus = max(2, static_cast<int>(ret.plus));
+                else if (ret.base_type == OBJ_JEWELLERY && jewellery_type_has_plusses(ret.sub_type))
+                    ret.plus = max(2, static_cast<int>(ret.plus));
+            }
         }
     }
     else

@@ -630,6 +630,15 @@ void wizard_make_object_randart()
         return;
     }
 
+    // Artifacts must have at least +2 bonus.
+    if (is_artefact(item))
+    {
+        if (item.base_type == OBJ_WEAPONS || item.base_type == OBJ_ARMOUR)
+            item.plus = max(2, static_cast<int>(item.plus));
+        else if (item.base_type == OBJ_JEWELLERY && jewellery_type_has_plusses(item.sub_type))
+            item.plus = max(2, static_cast<int>(item.plus));
+    }
+
     // If it was equipped, requip the item.
     if (eq != SLOT_UNUSED)
         equip_item(eq, invslot);

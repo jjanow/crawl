@@ -1338,6 +1338,9 @@ static void _summon_dancing_weapon(int power)
     if (one_chance_in(3))
     {
         make_item_randart(wpn, true);
+        // Artifacts must have at least +2 bonus.
+        if (is_artefact(wpn))
+            wpn.plus = max(2, static_cast<int>(wpn.plus));
         identify_item(wpn);
     }
 

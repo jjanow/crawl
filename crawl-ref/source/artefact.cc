@@ -1278,6 +1278,12 @@ void setup_unrandart(item_def &item, bool creating)
     item.base_type = unrand->base_type;
     item.sub_type  = unrand->sub_type;
     item.plus      = unrand->plus;
+
+    // Artifacts must have at least +2 bonus.
+    if (item.base_type == OBJ_WEAPONS || item.base_type == OBJ_ARMOUR)
+        item.plus = max(2, static_cast<int>(item.plus));
+    else if (item.base_type == OBJ_JEWELLERY && jewellery_type_has_plusses(item.sub_type))
+        item.plus = max(2, static_cast<int>(item.plus));
 }
 
 static bool _init_artefact_properties(item_def &item)
@@ -1981,6 +1987,12 @@ void make_ashenzari_randart(item_def &item)
     set_artefact_name(item, _ashenzari_artefact_name(item));
     item.props[ARTEFACT_APPEAR_KEY].get_string() =
         make_artefact_name(item, true);
+
+    // Artifacts must have at least +2 bonus.
+    if (item.base_type == OBJ_WEAPONS || item.base_type == OBJ_ARMOUR)
+        item.plus = max(2, static_cast<int>(item.plus));
+    else if (item.base_type == OBJ_JEWELLERY && jewellery_type_has_plusses(item.sub_type))
+        item.plus = max(2, static_cast<int>(item.plus));
 
 }
 
