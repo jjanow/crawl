@@ -2190,6 +2190,9 @@ int make_mons_armour(monster_type type, int level)
         item.base_type = OBJ_ARMOUR;
         item.sub_type  = ARM_ROBE;
         make_item_randart(item);
+        // Artifacts must have at least +2 bonus.
+        if (is_artefact(item))
+            item.plus = max(2, static_cast<int>(item.plus));
         item.plus = random_range(2, 4);
         break;
 

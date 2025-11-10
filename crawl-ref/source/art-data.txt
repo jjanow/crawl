@@ -412,7 +412,7 @@ WILL:    1
 
 NAME:    eveningstar "Brilliance"
 OBJ:     OBJ_WEAPONS/WPN_EVENINGSTAR
-PLUS:    +1
+PLUS:    +2
 INSCRIP: Umbra
 COLOUR:  ETC_FOUL_FLAME
 TILE:    urand_brilliance
@@ -812,7 +812,7 @@ DEX:     4
 NAME:     cloak of the Thief
 OBJ:      OBJ_ARMOUR/ARM_CLOAK
 INSCRIP:  Quiet
-PLUS:     +0
+PLUS:     +2
 COLOUR:   ETC_DARK
 TILE:     urand_thief
 TILE_EQ:  black
@@ -1006,7 +1006,7 @@ WILL:    1
 
 NAME:    hat of the Alchemist
 OBJ:     OBJ_ARMOUR/ARM_HAT
-PLUS:    -2
+PLUS:    +2
 COLOUR:  LIGHTMAGENTA
 TILE:    urand_alchemist
 TILE_EQ: turban_purple
@@ -1020,7 +1020,7 @@ ENUM:    FENCERS
 NAME:    fencer's gloves
 INSCRIP: Riposte
 OBJ:     OBJ_ARMOUR/ARM_GLOVES
-PLUS:    +0
+PLUS:    +2
 COLOUR:  WHITE
 TILE:    urand_fencer
 TILE_EQ: glove_white
@@ -1031,7 +1031,7 @@ DESCRIP: Riposte:   It allows the wearer to riposte with melee weapons, swiftly
 
 NAME:     cloak of Starlight
 OBJ:      OBJ_ARMOUR/ARM_CLOAK
-PLUS:     +1
+PLUS:     +2
 COLOUR:   ETC_ICE
 TILE:     urand_starlight
 TILE_EQ:  white
@@ -1468,7 +1468,7 @@ BOOL:    evil, seeinv, drain, deleted
 ENUM:    VINES
 NAME:    robe of Vines
 OBJ:     OBJ_ARMOUR/ARM_ROBE
-PLUS:    +1
+PLUS:    +2
 COLOUR:  GREEN
 TILE:    urand_vines
 TILE_EQ: vines
@@ -1628,7 +1628,7 @@ DESCRIP:  *Dream:    It absorbs a single lethal wound into itself, holding its
 
 NAME:     Delatra's gloves
 OBJ:      OBJ_ARMOUR/ARM_GLOVES
-PLUS:     +1
+PLUS:     +2
 COLOUR:   BLUE
 TILE:     urand_delatra
 TILE_EQ:  glove_blue
@@ -1820,7 +1820,7 @@ ENUM:    GADGETEER
 NAME:    gloves of the gadgeteer
 INSCRIP: Gadgeteer Wandboost
 OBJ:     OBJ_ARMOUR/ARM_GLOVES
-PLUS:    +0
+PLUS:    +2
 COLOUR:  MAGENTA
 TILE:    urand_gadgeteer
 TILE_EQ: glove_purple

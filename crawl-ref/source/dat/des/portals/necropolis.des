@@ -54,7 +54,7 @@ function necropolis_veto()
 end
 
 function necropolis_portal_entry(e)
-    local timeout_turns = crawl.random_range(900, 1200)
+    local timeout_turns = 999999999 -- never expire
 
     local messager = timed_msg {
         initmsg = { "You hear the solemn chanting of funerary rites.",

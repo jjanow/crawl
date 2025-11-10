@@ -2629,12 +2629,24 @@ static int _discharge_monsters(const coord_def &where, int pow,
         beam.draw(where);
     }
 
+    // Caster is immune to their own static discharge damage.
+    // The arc can still hit them and continue chaining, but does no damage.
+    if (&agent == victim)
+    {
+        int damage = 0;
+        // Recursion to give us chain-lightning
+        if (remaining > 0)
+        {
+            damage += apply_random_around_square([pow, &agent, remaining]
+                                                (coord_def where2) {
+                return _discharge_monsters(where2, pow, agent, remaining - 1);
+            }, where, true, 1);
+        }
+        return damage;
+    }
+
     int damage = FLAT_DISCHARGE_ARC_DAMAGE
                  + random2(3 + div_rand_round(pow, DISCHARGE_POWER_DIV));
-
-    // Reduced damage when arcing back to the caster.
-    if (&agent == victim)
-        damage = div_rand_round(damage, 2);
 
     damage = max(0, victim->apply_ac(damage, 0, ac_type::half));
 

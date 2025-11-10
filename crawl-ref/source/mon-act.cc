@@ -3644,6 +3644,10 @@ static void _launch_opportunity_attack(monster& mons)
 
 static void _maybe_launch_opportunity_attack(monster &mon, coord_def orig_pos)
 {
+    // Enemy attacks of opportunity have been disabled. Early return ensures
+    // that monsters never make an extra attack when the player moves away.
+    return;
+    // --- Original implementation preserved below for reference ---
     if (!mon.alive() || !crawl_state.potential_pursuers.count(&mon))
         return;
 

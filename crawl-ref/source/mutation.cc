@@ -23,6 +23,7 @@
 #include "dactions.h"
 #include "database.h" // getLongDescription
 #include "delay.h"
+#include "command.h"
 #include "describe.h"
 #include "english.h"
 #include "env.h"
@@ -49,6 +50,9 @@
 #include "unicode.h"
 #include "view.h"
 #include "xom.h"
+
+#define DEMON_FACET_POOL_KEY     "ds_facet_pool"
+#define DEMON_FACET_PROGRESS_KEY "ds_facet_progress"
 
 using namespace ui;
 
@@ -2807,6 +2811,314 @@ static const facet_def _demon_facets[] =
       { 50, 50, 50 } },
 };
 
+static int _demonspawn_facet_index(mutation_type mut)
+{
+    for (int idx = 0; idx < (int)ARRAYSZ(_demon_facets); ++idx)
+    {
+        for (mutation_type facet_mut : _demon_facets[idx].muts)
+            if (facet_mut == mut)
+                return idx;
+    }
+    return -1;
+}
+
+static int _count_unique_body_facets()
+{
+    vector<mutation_type> seen;
+    for (const body_facet_def &facet : _body_facets)
+    {
+        if (you.get_innate_mutation_level(facet.mut) <= 0)
+            continue;
+
+        if (find(seen.begin(), seen.end(), facet.mut) == seen.end())
+            seen.push_back(facet.mut);
+    }
+    return seen.size();
+}
+
+static void _initialise_demonspawn_facet_state(const vector<demon_mutation_info>& info)
+{
+    CrawlVector& pool =
+        you.props[DEMON_FACET_POOL_KEY].new_vector(SV_VEC, SFLAG_CONST_TYPE);
+    pool.clear();
+
+    vector<int> facet_to_index(ARRAYSZ(_demon_facets), -1);
+
+    for (const demon_mutation_info& entry : info)
+    {
+        if (entry.facet < 0 || entry.facet >= (int)ARRAYSZ(_demon_facets))
+            continue;
+
+        int pool_index = facet_to_index[entry.facet];
+        if (pool_index == -1)
+        {
+            CrawlStoreValue facet_store;
+            facet_store.new_vector(SV_INT, SFLAG_CONST_TYPE);
+            pool_index = pool.size();
+            pool.push_back(facet_store);
+            facet_to_index[entry.facet] = pool_index;
+        }
+
+        pool[pool_index].get_vector().push_back(static_cast<int>(entry.mut));
+    }
+
+    CrawlVector& progress =
+        you.props[DEMON_FACET_PROGRESS_KEY].new_vector(SV_INT, SFLAG_CONST_TYPE);
+    progress.clear();
+    progress.resize(pool.size());
+    for (vec_size i = 0; i < progress.size(); ++i)
+        progress[i].get_int() = 0;
+}
+
+static void _ensure_demonspawn_facet_state()
+{
+    if (!you.props.exists(DEMON_FACET_POOL_KEY))
+    {
+        CrawlVector& pool =
+            you.props[DEMON_FACET_POOL_KEY].new_vector(SV_VEC, SFLAG_CONST_TYPE);
+        pool.clear();
+
+        vector<int> facet_counts(ARRAYSZ(_demon_facets), 0);
+        for (const player::demon_trait &trait : you.demonic_traits)
+        {
+            const int facet = _demonspawn_facet_index(trait.mutation);
+            if (facet >= 0)
+                ++facet_counts[facet];
+        }
+
+        for (int facet = 0; facet < (int)ARRAYSZ(_demon_facets); ++facet)
+        {
+            const int count = facet_counts[facet];
+            if (!count)
+                continue;
+
+            CrawlStoreValue facet_store;
+            facet_store.new_vector(SV_INT, SFLAG_CONST_TYPE);
+            CrawlVector& facet_vec = facet_store.get_vector();
+            for (int tier = 0; tier < count; ++tier)
+                facet_vec.push_back(static_cast<int>(_demon_facets[facet].muts[tier]));
+            pool.push_back(facet_store);
+        }
+    }
+
+    CrawlVector &pool = you.props[DEMON_FACET_POOL_KEY].get_vector();
+
+    CrawlVector *progress_ptr = nullptr;
+    if (!you.props.exists(DEMON_FACET_PROGRESS_KEY))
+    {
+        progress_ptr =
+            &you.props[DEMON_FACET_PROGRESS_KEY].new_vector(SV_INT, SFLAG_CONST_TYPE);
+        progress_ptr->clear();
+    }
+    else
+        progress_ptr = &you.props[DEMON_FACET_PROGRESS_KEY].get_vector();
+
+    CrawlVector &progress = *progress_ptr;
+    vec_size pool_size = pool.size();
+    if (progress.size() < pool_size)
+    {
+        vec_size old_size = progress.size();
+        progress.resize(pool_size);
+        for (vec_size i = old_size; i < pool_size; ++i)
+            progress[i].get_int() = 0;
+    }
+}
+
+static void _sync_demonspawn_facet_progress_internal()
+{
+    if (!you.props.exists(DEMON_FACET_POOL_KEY)
+        || !you.props.exists(DEMON_FACET_PROGRESS_KEY))
+    {
+        return;
+    }
+
+    const CrawlVector& pool = you.props[DEMON_FACET_POOL_KEY].get_vector();
+    CrawlVector& progress = you.props[DEMON_FACET_PROGRESS_KEY].get_vector();
+
+    if (progress.size() < pool.size())
+    {
+        vec_size old_size = progress.size();
+        progress.resize(pool.size());
+        for (vec_size i = old_size; i < pool.size(); ++i)
+            progress[i].get_int() = 0;
+    }
+
+    for (vec_size i = 0; i < pool.size(); ++i)
+    {
+        const CrawlVector& facet_vec = pool[i].get_vector();
+        int total = facet_vec.size();
+        int gained = 0;
+
+        for (vec_size tier = 0; tier < facet_vec.size(); ++tier)
+        {
+            const mutation_type mut =
+                static_cast<mutation_type>(facet_vec[tier].get_int());
+
+            if (tier > 0
+                && facet_vec[tier].get_int() == facet_vec[tier - 1].get_int())
+            {
+                if (you.get_innate_mutation_level(mut) >= static_cast<int>(tier) + 1)
+                {
+                    gained = tier + 1;
+                    continue;
+                }
+                break;
+            }
+
+            if (you.get_innate_mutation_level(mut) > 0)
+                gained = tier + 1;
+            else
+                break;
+        }
+
+        progress[i].get_int() = min(gained, total);
+    }
+}
+
+void sync_demonspawn_facet_progress()
+{
+    _ensure_demonspawn_facet_state();
+    _sync_demonspawn_facet_progress_internal();
+}
+
+struct demonspawn_option
+{
+    int pool_index;
+    mutation_type mutation;
+    int next_tier;
+    int total_tiers;
+};
+
+static vector<demonspawn_option> _collect_demonspawn_options()
+{
+    vector<demonspawn_option> options;
+    set<mutation_type> mutations_in_options;
+    
+    // Collect mutations from the current pool (if it exists)
+    if (you.props.exists(DEMON_FACET_POOL_KEY)
+        && you.props.exists(DEMON_FACET_PROGRESS_KEY))
+    {
+        const CrawlVector& pool = you.props[DEMON_FACET_POOL_KEY].get_vector();
+        const CrawlVector& progress = you.props[DEMON_FACET_PROGRESS_KEY].get_vector();
+
+        for (vec_size i = 0; i < pool.size(); ++i)
+        {
+            const CrawlVector& facet_vec = pool[i].get_vector();
+            const int total = facet_vec.size();
+            if (!total)
+                continue;
+
+            int prog = 0;
+            if (i < progress.size())
+                prog = progress[i].get_int();
+            prog = min(max(prog, 0), total);
+
+            if (prog >= total)
+                continue;
+
+            mutation_type mut =
+                static_cast<mutation_type>(facet_vec[prog].get_int());
+            
+            // Only include mutations that are actually demonspawn mutations
+            // and that are not already at their maximum level
+            if (_demonspawn_facet_index(mut) >= 0
+                && you.get_innate_mutation_level(mut) < mutation_max_levels(mut))
+            {
+                options.push_back({ static_cast<int>(i), mut, prog + 1, total });
+                mutations_in_options.insert(mut);
+            }
+        }
+    }
+
+    return options;
+}
+
+class DemonspawnMenuEntry : public ToggleableMenuEntry
+{
+public:
+    DemonspawnMenuEntry(const string &txt,
+                        const string &alt_txt,
+                        const demonspawn_option &opt,
+                        int hotkey)
+        : ToggleableMenuEntry(txt, alt_txt, MEL_ITEM, 1, hotkey),
+          option(opt)
+    {
+    }
+
+    demonspawn_option option;
+};
+
+class DemonspawnMenu : public ToggleableMenu
+{
+public:
+    DemonspawnMenu()
+        : ToggleableMenu(MF_SINGLESELECT | MF_UNCANCEL | MF_INIT_HOVER
+                         | MF_ALLOW_FORMATTING | MF_ARROWS_SELECT)
+    {
+        menu_action = Menu::ACT_EXECUTE;
+    }
+};
+
+static bool _prompt_demonspawn_mutation(demonspawn_option &selection)
+{
+    vector<demonspawn_option> options = _collect_demonspawn_options();
+    if (options.empty())
+        return false;
+
+    DemonspawnMenu menu;
+    menu.set_tag("demonspawn_mutation");
+    menu.set_title("Choose how your demonic ancestry manifests");
+    menu.add_toggle_from_command(CMD_MENU_CYCLE_MODE);
+    menu.add_toggle_from_command(CMD_MENU_CYCLE_MODE_REVERSE);
+
+    string more = "<lightgrey>Select a mutation to gain.</lightgrey>";
+    string toggle = menu_keyhelp_cmd(CMD_MENU_CYCLE_MODE);
+    toggle += " toggle descriptions";
+    more = pad_more_with(more, toggle);
+    menu.set_more(formatted_string::parse_string(more));
+
+    menu_letter letter;
+    for (const demonspawn_option &opt : options)
+    {
+        const mutation_type mut = opt.mutation;
+        const string name = uppercase_first(string(mutation_name(mut)));
+        string summary = mut_upgrade_summary(mut);
+        if (summary.empty())
+            summary = "no description available";
+
+        const string short_text = make_stringf(
+            "%s <lightgrey>(tier %d/%d)</lightgrey>: %s",
+            name.c_str(), opt.next_tier, opt.total_tiers, summary.c_str());
+
+        string long_text = get_mutation_desc(mut);
+        if (long_text.empty())
+            long_text = summary;
+
+        DemonspawnMenuEntry *entry =
+            new DemonspawnMenuEntry(short_text, long_text, opt, letter);
+
+#ifdef USE_TILE
+        if (tileidx_t tile = get_mutation_tile(mut))
+            entry->add_tile(tile_def(tile));
+#endif
+
+        menu.add_entry(entry);
+        ++letter;
+    }
+
+    vector<MenuEntry*> sel = menu.show();
+    if (sel.empty())
+        return false;
+
+    if (auto *entry = dynamic_cast<DemonspawnMenuEntry*>(sel.front()))
+    {
+        selection = entry->option;
+        return true;
+    }
+
+    return false;
+}
+
 static bool _works_at_tier(const facet_def& facet, int tier)
 {
     return facet.tier == tier;
@@ -3002,9 +3314,76 @@ void roll_demonspawn_mutations()
 
     if (you.species != SP_DEMONSPAWN)
         return;
-    you.demonic_traits = _schedule_ds_mutations(
-                         _order_ds_mutations(
-                         _select_ds_mutations()));
+    vector<demon_mutation_info> info = _select_ds_mutations();
+    _initialise_demonspawn_facet_state(info);
+    vector<mutation_type> ordered = _order_ds_mutations(info);
+    you.demonic_traits = _schedule_ds_mutations(ordered);
+    _sync_demonspawn_facet_progress_internal();
+}
+
+void handle_demonspawn_level_up()
+{
+    if (you.species != SP_DEMONSPAWN)
+        return;
+
+    vector<int> pending_indices;
+    for (int i = 0; i < (int)you.demonic_traits.size(); ++i)
+        if (you.demonic_traits[i].level_gained == you.experience_level)
+            pending_indices.push_back(i);
+
+    if (pending_indices.empty())
+        return;
+
+    _ensure_demonspawn_facet_state();
+    _sync_demonspawn_facet_progress_internal();
+
+    int body_facets_before = _count_unique_body_facets();
+    bool gave_message = false;
+
+    CrawlVector& progress_vec = you.props[DEMON_FACET_PROGRESS_KEY].get_vector();
+
+    for (int index : pending_indices)
+    {
+        demonspawn_option choice;
+        const bool have_choice = _prompt_demonspawn_mutation(choice);
+
+        if (!have_choice)
+        {
+            choice.pool_index = -1;
+            choice.mutation = you.demonic_traits[index].mutation;
+        }
+
+        if (!gave_message)
+        {
+            mprf(MSGCH_INTRINSIC_GAIN, "Your demonic ancestry asserts itself...");
+            gave_message = true;
+        }
+
+        perma_mutate(choice.mutation, 1, "demonic ancestry");
+        you.demonic_traits[index].mutation = choice.mutation;
+
+        if (have_choice && choice.pool_index >= 0)
+        {
+            CrawlVector& pool_vec = you.props[DEMON_FACET_POOL_KEY].get_vector();
+            if (choice.pool_index < (int)progress_vec.size())
+            {
+                const int total = pool_vec[choice.pool_index].get_vector().size();
+                progress_vec[choice.pool_index].get_int() =
+                    min(choice.next_tier, total);
+            }
+        }
+
+        _sync_demonspawn_facet_progress_internal();
+    }
+
+    int body_facets_after = _count_unique_body_facets();
+    if (body_facets_before < 2 && body_facets_after >= 2)
+    {
+        mprf(MSGCH_MUTATION,
+             "You feel monstrous as your demonic heritage exerts itself.");
+        mark_milestone("monstrous", "discovered their monstrous ancestry!");
+        take_note(Note(NOTE_MESSAGE, 0, 0, "Discovered your monstrous ancestry."));
+    }
 }
 
 bool perma_mutate(mutation_type which_mut, int how_much, const string &reason)

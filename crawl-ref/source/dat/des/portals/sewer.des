@@ -19,7 +19,7 @@
 -- glyph to place a monster, they should define the `1' through KMONS (and not
 -- the usual MONS statement).
 function sewer_portal(e)
-  local timeout_turns = crawl.random_range(600, 800)
+  local timeout_turns = 999999999 -- never expire
 
   local messager =
     timed_msg {

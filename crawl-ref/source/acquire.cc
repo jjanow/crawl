@@ -1305,7 +1305,12 @@ int acquirement_create_item(object_class_type class_wanted,
 
             // bump jewel acq power up a bit
             if (one_chance_in(2) && !is_artefact(acq_item))
+            {
                 make_item_randart(acq_item);
+                // Artifacts must have at least +2 bonus if the jewellery type supports plusses.
+                if (is_artefact(acq_item) && jewellery_type_has_plusses(acq_item.sub_type))
+                    acq_item.plus = max(2, static_cast<int>(acq_item.plus));
+            }
         }
         else if (acq_item.base_type == OBJ_WEAPONS
                  && !is_unrandom_artefact(acq_item))
@@ -1318,13 +1323,21 @@ int acquirement_create_item(object_class_type class_wanted,
                 && !one_chance_in(25))
             {
                 make_item_randart(acq_item, true);
+                // Artifacts must have at least +2 bonus.
+                if (is_artefact(acq_item))
+                    acq_item.plus = max(2, static_cast<int>(acq_item.plus));
             }
 
             if (agent == GOD_TROG)
                 acq_item.plus += random2(3);
             // Don't acquire negative enchantment except via Xom.
             if (agent != GOD_XOM)
+            {
                 acq_item.plus = max(static_cast<int>(acq_item.plus), 0);
+                // Artifacts must have at least +2 bonus.
+                if (is_artefact(acq_item))
+                    acq_item.plus = max(2, static_cast<int>(acq_item.plus));
+            }
         }
         else if (acq_item.base_type == OBJ_TALISMANS
                  && !is_artefact(acq_item) && one_chance_in(4))

@@ -80,6 +80,8 @@ string mutation_desc(mutation_type which_mutat, int level = -1,
                           bool colour = false, bool is_sacrifice = false);
 
 void roll_demonspawn_mutations();
+void handle_demonspawn_level_up();
+void sync_demonspawn_facet_progress();
 
 bool perma_mutate(mutation_type which_mut, int how_much, const string &reason);
 bool temp_mutate(mutation_type which_mut, const string &reason);

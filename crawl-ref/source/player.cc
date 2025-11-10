@@ -1770,14 +1770,10 @@ int player_movement_speed(bool check_terrain, bool temp)
     if (temp && you.duration[DUR_FROZEN])
         mv = div_rand_round(mv * 3, 2);
 
-    if (temp && you.duration[DUR_SWIFTNESS] > 0)
+    if (temp && you.duration[DUR_SWIFTNESS] > 0
+        && you.attribute[ATTR_SWIFTNESS] > 0)
     {
-        if (you.attribute[ATTR_SWIFTNESS] > 0)
-          mv = div_rand_round(3*mv, 4);
-        else if (mv >= 8)
-          mv = div_rand_round(3*mv, 2);
-        else if (mv == 7)
-          mv = div_rand_round(7*6, 5); // balance for the cap at 6
+        mv = div_rand_round(3*mv, 4);
     }
 
     // We'll use the old value of six as a minimum, with haste this could
@@ -2963,56 +2959,9 @@ void level_change(bool skip_attribute_increase)
                 }
                 break;
 
-            case SP_DEMONSPAWN:
-            {
-                bool gave_message = false;
-                int level = 0;
-                mutation_type first_body_facet = NUM_MUTATIONS;
-
-                for (const player::demon_trait trait : you.demonic_traits)
-                {
-                    if (is_body_facet(trait.mutation))
-                    {
-                        if (first_body_facet < NUM_MUTATIONS
-                            && trait.mutation != first_body_facet)
-                        {
-                            if (you.experience_level == level)
-                            {
-                                mprf(MSGCH_MUTATION, "You feel monstrous as "
-                                     "your demonic heritage exerts itself.");
-                                mark_milestone("monstrous", "discovered their "
-                                               "monstrous ancestry!");
-                                take_note(Note(NOTE_MESSAGE, 0, 0,
-                                     "Discovered your monstrous ancestry."));
-                            }
-                            break;
-                        }
-
-                        if (first_body_facet == NUM_MUTATIONS)
-                        {
-                            first_body_facet = trait.mutation;
-                            level = trait.level_gained;
-                        }
-                    }
-                }
-
-                for (const player::demon_trait trait : you.demonic_traits)
-                {
-                    if (trait.level_gained == you.experience_level)
-                    {
-                        if (!gave_message)
-                        {
-                            mprf(MSGCH_INTRINSIC_GAIN,
-                                 "Your demonic ancestry asserts itself...");
-
-                            gave_message = true;
-                        }
-                        perma_mutate(trait.mutation, 1, "demonic ancestry");
-                    }
-                }
-
-                break;
-            }
+        case SP_DEMONSPAWN:
+            handle_demonspawn_level_up();
+            break;
 
             case SP_COGLIN:
             {
@@ -3161,7 +3110,13 @@ int player_stealth()
 
     int stealth = you.dex() * 3;
 
-    stealth += you.skill(SK_STEALTH, 15);
+    // Stealth scales steadily with skill, becoming 100% undetectable at skill 27.
+    // Base contribution plus quadratic scaling for aggressive growth at high levels.
+    int stealth_skill = you.skill(SK_STEALTH, 15);
+    int skill_level = you.skill(SK_STEALTH);
+    // Quadratic scaling: skill^2 * 20 provides strong growth, ensuring
+    // extremely high stealth at level 27 (effectively 100% undetectable).
+    stealth += stealth_skill + (skill_level * skill_level * 20);
 
     if (you.confused())
         stealth /= 3;
@@ -3287,9 +3242,7 @@ static void _display_movement_speed()
 
     const bool fly    = you.airborne();
     const bool swift  = (you.duration[DUR_SWIFTNESS] > 0
-                         && you.attribute[ATTR_SWIFTNESS] >= 0);
-    const bool antiswift = (you.duration[DUR_SWIFTNESS] > 0
-                            && you.attribute[ATTR_SWIFTNESS] < 0);
+                         && you.attribute[ATTR_SWIFTNESS] > 0);
 
     _display_char_status(move_cost, "Your %s speed is %s%s%s",
           // order is important for these:
@@ -3298,14 +3251,10 @@ static void _display_movement_speed()
           (fly)     ? "flying"
                     : "movement",
 
-          (swift) ? "aided by the wind" :
-          (antiswift) ? "hindered by the wind" : "",
+          (swift) ? "aided by the wind" : "",
 
           (swift) ? ((move_cost >= 10) ? ", but still "
-                                                 : " and ") :
-          (antiswift) ? ((move_cost <= 10) ? ", but still "
-                                                     : " and ")
-                            : "",
+                                                 : " and ") : "",
 
           (move_cost <   8) ? "very quick" :
           (move_cost <  10) ? "quick" :

@@ -1141,8 +1141,6 @@ static void _get_randart_properties(const item_def &item,
     // We'll potentially add up to 2 bad properties, also considering any fixed
     // bad properties.
     int bad = 0;
-    if (fixed_bad < 2)
-        bad = binomial(2 - fixed_bad,  21);
 
     // For each point of quality and for each bad property added, we'll add or
     // enhance one good property.
@@ -1280,6 +1278,12 @@ void setup_unrandart(item_def &item, bool creating)
     item.base_type = unrand->base_type;
     item.sub_type  = unrand->sub_type;
     item.plus      = unrand->plus;
+
+    // Artifacts must have at least +2 bonus.
+    if (item.base_type == OBJ_WEAPONS || item.base_type == OBJ_ARMOUR)
+        item.plus = max(2, static_cast<int>(item.plus));
+    else if (item.base_type == OBJ_JEWELLERY && jewellery_type_has_plusses(item.sub_type))
+        item.plus = max(2, static_cast<int>(item.plus));
 }
 
 static bool _init_artefact_properties(item_def &item)
@@ -1983,6 +1987,12 @@ void make_ashenzari_randart(item_def &item)
     set_artefact_name(item, _ashenzari_artefact_name(item));
     item.props[ARTEFACT_APPEAR_KEY].get_string() =
         make_artefact_name(item, true);
+
+    // Artifacts must have at least +2 bonus.
+    if (item.base_type == OBJ_WEAPONS || item.base_type == OBJ_ARMOUR)
+        item.plus = max(2, static_cast<int>(item.plus));
+    else if (item.base_type == OBJ_JEWELLERY && jewellery_type_has_plusses(item.sub_type))
+        item.plus = max(2, static_cast<int>(item.plus));
 
 }
 

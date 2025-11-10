@@ -1127,7 +1127,7 @@ void move_player_action(coord_def move)
                  DESC_THE).c_str());
             destroy_wall(targ);
             noisy(6, you.pos());
-            drain_player(15, false, true);
+            //drain_player(15, false, true);
             dug = true;
         }
 

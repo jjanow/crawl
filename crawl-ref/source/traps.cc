@@ -1333,6 +1333,8 @@ static void _print_malev()
  */
 void do_trap_effects()
 {
+    return; //disable the malevolent force nonsense
+
     if (crawl_state.game_is_descent())
         return;
 

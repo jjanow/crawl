@@ -119,17 +119,17 @@ static map<deck_type, deck_type_data> all_decks =
     { DECK_OF_ESCAPE, {
         "escape", "which may bring the user to safety or impede their foes.",
         deck_of_escape,
-        13,
+        999999, // Unlimited
     } },
     { DECK_OF_DESTRUCTION, {
         "destruction", "which hurl death and destruction with wild abandon.",
         deck_of_destruction,
-        26,
+        999999, // Unlimited
     } },
     { DECK_OF_SUMMONING, {
         "summoning", "depicting a range of weird and wonderful creatures.",
         deck_of_summoning,
-        13,
+        999999, // Unlimited
     } },
     { DECK_OF_PUNISHMENT, {
         "punishment", "which wreak havoc on the user.", deck_of_punishment,
@@ -1338,6 +1338,9 @@ static void _summon_dancing_weapon(int power)
     if (one_chance_in(3))
     {
         make_item_randart(wpn, true);
+        // Artifacts must have at least +2 bonus.
+        if (is_artefact(wpn))
+            wpn.plus = max(2, static_cast<int>(wpn.plus));
         identify_item(wpn);
     }
 

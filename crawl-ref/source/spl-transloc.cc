@@ -970,22 +970,11 @@ void you_teleport()
     }
     else
     {
+        // Previously, teleportation incurred a startup delay via the
+        // DUR_TELEPORT status effect. Remove that delay so teleportation
+        // occurs immediately from all sources.
         mpr("You feel strangely unstable.");
-
-        int teleport_delay = 3 + random2(3);
-
-        if (player_in_branch(BRANCH_ABYSS))
-        {
-            mpr("You feel the power of the Abyss delaying your translocation!");
-            teleport_delay += 5 + random2(10);
-        }
-        else if (orb_limits_translocation())
-        {
-            mprf(MSGCH_ORB, "You feel the Orb delaying your translocation!");
-            teleport_delay += 5 + random2(5);
-        }
-
-        you.set_duration(DUR_TELEPORT, teleport_delay);
+        you_teleport_now();
     }
 }
 

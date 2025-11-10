@@ -14,7 +14,7 @@
 
 {{
 function bailey_portal(e, ptype)
-  local timeout_turns = crawl.random_range(600, 800)
+  local timeout_turns = 999999999 -- never expire
 
   local messager =
     timed_msg {
@@ -580,7 +580,6 @@ ttttttttttttttcdd2.2ddctttttttttttttt
 tttttttttttttcc.......ccttttttttttttt
 tttttttttttttc.........cttttttttttttt
 ttttttttttttcc.1.....1.cctttttttttttt
-ttttttccccccc2...1T1...2ccccccctttttt
 tttttcc1.2.1cc.1.....1.cc1.2.1ccttttt
 tttttc.......+....2....+.......cttttt
 ttttcc.......cc.1...1.cc.......cctttt

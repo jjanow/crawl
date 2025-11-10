@@ -1109,8 +1109,8 @@ command_type travel()
             if (you.duration[type] == 0)
                 continue;
 
-            // Only rest off the bad part of Swiftness
-            if (type == DUR_SWIFTNESS && you.attribute[ATTR_SWIFTNESS] > 0)
+            // Don't rest off Swiftness
+            if (type == DUR_SWIFTNESS)
                 continue;
 
             // Only try to rest off transformations when this is both possible
@@ -3433,10 +3433,7 @@ void start_explore(bool grab_items)
 
 void do_explore_cmd()
 {
-    if (you.berserk())
-        mpr("Calm down first, please.");
-    else                        // Start exploring
-        start_explore(Options.explore_greedy);
+    start_explore(Options.explore_greedy);
 }
 
 //////////////////////////////////////////////////////////////////////////

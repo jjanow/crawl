@@ -343,9 +343,7 @@ currents will prevent this pestilence from forming wherever the caster is
 standing, but they are not otherwise protected from its effects.
 
 This spell may only be cast on a living creature who is at least heavily
-wounded, and channelling such necrotic energies will leave the caster's own
-health temporarily drained (though spellpower will reduce the intensity of this
-side-effect).
+wounded.
 %%%%
 Cleansing Flame spell
 
@@ -2185,8 +2183,7 @@ Summons one or more water elementals.
 %%%%
 Swiftness spell
 
-Calls forth winds to greatly increase the caster's movement speed. After the
-effect ends, the caster's movements will be sluggish for a time.
+Calls forth winds to greatly increase the caster's movement speed.
 %%%%
 Symbol of Torment spell
 

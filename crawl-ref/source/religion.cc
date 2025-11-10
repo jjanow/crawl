@@ -4237,8 +4237,7 @@ void handle_god_time(int /*time_delta*/)
         case GOD_WU_JIAN:
         case GOD_SIF_MUNA:
         case GOD_YREDELEMNUL:
-            if (one_chance_in(17))
-                lose_piety(1);
+            // Piety no longer decays over time
             break;
 
         case GOD_ELYVILON:
@@ -4247,13 +4246,11 @@ void handle_god_time(int /*time_delta*/)
         case GOD_CHEIBRIADOS:
         case GOD_SHINING_ONE:
         case GOD_NEMELEX_XOBEH:
-            if (one_chance_in(35))
-                lose_piety(1);
+            // Piety no longer decays over time
             break;
 
         case GOD_BEOGH:
-            if (one_chance_in(17))
-                lose_piety(1);
+            // Piety no longer decays over time
             maybe_generate_apostle_challenge();
             break;
 

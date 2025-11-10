@@ -60,7 +60,7 @@ enum attribute_type
 #if TAG_MAJOR_VERSION == 34
     ATTR_RECITE_HP,            // HP on start of recitation.
 #endif
-    ATTR_SWIFTNESS,            // Duration of future antiswiftness.
+    ATTR_SWIFTNESS,            // Tracks active swiftness duration.
 #if TAG_MAJOR_VERSION == 34
     ATTR_BARBS_MSG,            // Have we already printed a message on move?
 #endif

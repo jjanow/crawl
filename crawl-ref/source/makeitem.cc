@@ -244,6 +244,10 @@ static bool _try_make_weapon_artefact(item_def& item, int force_type,
         if (artefact_property(item, ARTP_BANE))
             item.plus = min(12, item.plus + random_range(2, 5));
 
+        // Artifacts must have at least +2 bonus.
+        if (is_artefact(item))
+            item.plus = max(2, static_cast<int>(item.plus));
+
         if (old_ego > 0)
             set_artefact_brand(item, old_ego);
 
@@ -747,6 +751,10 @@ static bool _try_make_armour_artefact(item_def& item, int force_type,
     // bit more tempting on average.
     if (is_artefact(item) && artefact_property(item, ARTP_BANE))
         item.plus = max((int)item.plus, armour_max_enchant(item) / 2 + random_range(1, 2));
+
+    // Artifacts must have at least +2 bonus.
+    if (is_artefact(item))
+        item.plus = max(2, static_cast<int>(item.plus));
 
     if (old_ego > 0)
         set_artefact_brand(item, old_ego);
@@ -1657,6 +1665,10 @@ static void _generate_jewellery_item(item_def& item, bool allow_uniques,
            && x_chance_in_y(101 + item_level * 3, 4000))
     {
         make_item_randart(item);
+        
+        // Artifacts must have at least +2 bonus if the jewellery type supports plusses.
+        if (is_artefact(item) && jewellery_type_has_plusses(item.sub_type))
+            item.plus = max(2, static_cast<int>(item.plus));
     }
 }
 
@@ -2239,7 +2251,15 @@ void lucky_upgrade_item(item_def& item)
     else if (item.base_type == OBJ_WEAPONS)
         did_upgrade = _try_make_weapon_artefact(item, 0, ISPEC_RANDART, true, 0);
     else
+    {
         did_upgrade = make_item_randart(item);
+        // Artifacts must have at least +2 bonus if applicable.
+        if (did_upgrade && is_artefact(item))
+        {
+            if (item.base_type == OBJ_JEWELLERY && jewellery_type_has_plusses(item.sub_type))
+                item.plus = max(2, static_cast<int>(item.plus));
+        }
+    }
 
     if (did_upgrade)
     {
