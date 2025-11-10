@@ -4,12 +4,51 @@
 
 Dungeon Crawl Stone Soup is a game of dungeon exploration, combat and magic, involving characters of diverse skills, worshipping deities of great power and caprice. To win, you'll need to be a master of tactics and strategy, and prevail against overwhelming odds.
 
+## Fork
+
+This fork includes various quality-of-life improvements and gameplay modifications made by Jimmy Janow, starting from July 18, 2025. The changes focus on removing frustrating penalties, improving player agency, and streamlining gameplay mechanics.
+
+### Combat & Movement Improvements
+* Disabled attacks of opportunity
+* Removed delays from teleports
+* Removed delay when going up and down stairs
+* Removed delay on equipping anything but armor
+* Removed equipment swapping delays for most gear
+* Removed berserk preventing you from using auto-explore
+
+### Spell & Ability Changes
+* Removed static discharge spell harming the caster
+* Removed slowness debuff from the swiftness spell
+* Improved stealth chances (27 stealth should not get caught constantly)
+
+### Character & Mutation System
+* Added demonspawn menu to let the player select the mutations they want
+* Fixed demonspawn mutations having non-demonspawn mutations available
+
+### Item & Artifact Generation
+* Removed negative plusses on artifact generation
+* Removed negative artifact traits
+* Removed unused parameter for clouds
+
+### Deity & Piety System
+* Removed general piety decay from walking around
+* Added visible god wrath in character UI
+
+### Gameplay Mechanics
+* Disabled the malevolent force mechanic
+* Removed HP drain for players digging
+* Removed timeout for portal branches
+* Removed deck number limits for Nemelex Xobeh
+* Removed Cigotuvis putrefaction downside
+* Display XP from all kills
+
 ## Contents
 
-1. [How to Play](#how-to-play)
+1. [Fork](#fork)
+2. [How to Play](#how-to-play)
 3. [Community](#community)
-5. [How you can help](#how-you-can-help)
-4. [License and history information](#license-and-history-information)
+4. [How you can help](#how-you-can-help)
+5. [License and history information](#license-and-history-information)
 
 ## How to Play
 
