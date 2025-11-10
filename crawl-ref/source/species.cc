@@ -734,6 +734,7 @@ void change_species_to(species_type sp)
             ++you.mutation[m];
             ++you.innate_mutation[m];
         }
+        sync_demonspawn_facet_progress();
     }
 
     update_vision_range(); // for Ba, and for Ko
