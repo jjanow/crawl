@@ -2994,7 +2994,7 @@ static vector<demonspawn_option> _collect_demonspawn_options()
     vector<demonspawn_option> options;
     set<mutation_type> mutations_in_options;
     
-    // First, collect mutations from the current pool (if it exists)
+    // Collect mutations from the current pool (if it exists)
     if (you.props.exists(DEMON_FACET_POOL_KEY)
         && you.props.exists(DEMON_FACET_PROGRESS_KEY))
     {
@@ -3018,27 +3018,13 @@ static vector<demonspawn_option> _collect_demonspawn_options()
 
             mutation_type mut =
                 static_cast<mutation_type>(facet_vec[prog].get_int());
-            options.push_back({ static_cast<int>(i), mut, prog + 1, total });
-            mutations_in_options.insert(mut);
-        }
-    }
-
-    // Now add all unique mutations from all facets that aren't already in options
-    for (int facet_idx = 0; facet_idx < (int)ARRAYSZ(_demon_facets); ++facet_idx)
-    {
-        const facet_def& facet = _demon_facets[facet_idx];
-        const int total_tiers = 3; // All facets have 3 tiers
-        
-        // Add all unique mutations from all tiers of this facet
-        for (int tier = 0; tier < total_tiers; ++tier)
-        {
-            mutation_type mut = facet.muts[tier];
             
-            if (mutations_in_options.find(mut) == mutations_in_options.end())
+            // Only include mutations that are actually demonspawn mutations
+            // and that are not already at their maximum level
+            if (_demonspawn_facet_index(mut) >= 0
+                && you.get_innate_mutation_level(mut) < mutation_max_levels(mut))
             {
-                // Add as a new option with pool_index = -1 (not in current pool)
-                // Show as tier 1 since it's not in the pool
-                options.push_back({ -1, mut, 1, total_tiers });
+                options.push_back({ static_cast<int>(i), mut, prog + 1, total });
                 mutations_in_options.insert(mut);
             }
         }
