@@ -3157,7 +3157,13 @@ int player_stealth()
 
     int stealth = you.dex() * 3;
 
-    stealth += you.skill(SK_STEALTH, 15);
+    // Stealth scales steadily with skill, becoming 100% undetectable at skill 27.
+    // Base contribution plus quadratic scaling for aggressive growth at high levels.
+    int stealth_skill = you.skill(SK_STEALTH, 15);
+    int skill_level = you.skill(SK_STEALTH);
+    // Quadratic scaling: skill^2 * 20 provides strong growth, ensuring
+    // extremely high stealth at level 27 (effectively 100% undetectable).
+    stealth += stealth_skill + (skill_level * skill_level * 20);
 
     if (you.confused())
         stealth /= 3;

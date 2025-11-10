@@ -307,7 +307,10 @@ bool check_awaken(monster* mons, int stealth)
     if (mons_perc < 4)
         mons_perc = 4;
 
-    if (x_chance_in_y(mons_perc + 1, stealth))
+    // Detection chance = mons_perc / (mons_perc + stealth)
+    // This makes stealth actually effective: with stealth = mons_perc, you have 50% detection chance
+    // With stealth = 2 * mons_perc, you have 33% detection chance, etc.
+    if (x_chance_in_y(mons_perc, mons_perc + stealth))
         return true; // Oops, the monster wakes up!
 
     // You didn't wake the monster!
