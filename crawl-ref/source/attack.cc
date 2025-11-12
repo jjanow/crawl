@@ -197,8 +197,12 @@ int attack::calc_pre_roll_to_hit(bool random)
         else
         {
             // UC gets extra acc to compensate for lack of weapon enchantment.
+            // +1 per 3 skill levels, capped at +9 at skill 27.
             if (wpn_skill == SK_UNARMED_COMBAT)
-                mhit += 6;
+            {
+                const int uc_skill = you.skill(SK_UNARMED_COMBAT);
+                mhit += min(9, uc_skill / 3);
+            }
 
             mhit += maybe_random2_div(you.skill(wpn_skill, 100), 100,
                                      random);
@@ -973,7 +977,7 @@ int attack::calc_damage()
 
         damage = random2(potential_damage+1);
 
-        if (using_weapon())
+        if (using_weapon() || wpn_skill == SK_UNARMED_COMBAT)
             damage = apply_weapon_skill(damage, wpn_skill, true);
         damage = apply_fighting_skill(damage, false, true);
         damage = player_apply_misc_modifiers(damage);

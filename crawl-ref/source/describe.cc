@@ -1437,9 +1437,9 @@ string damage_rating(const item_def *item, int *rating_value)
     const skill_type skill = item ? _item_training_skill(*item) : SK_UNARMED_COMBAT;
     const int stat_mult = stat_modify_damage(100, skill, true);
     const bool use_str = weapon_uses_strength(skill, true);
-    // Throwing weapons and UC only get a damage mult from Fighting skill,
-    // not from Throwing/UC skill.
-    const bool use_weapon_skill = item && !thrown;
+    // Throwing weapons only get a damage mult from Fighting skill,
+    // not from Throwing skill. Unarmed and weapons get weapon skill multiplier.
+    const bool use_weapon_skill = (item && !thrown) || !item;
     const int weapon_skill_mult = use_weapon_skill ? apply_weapon_skill(100, skill, false) : 100;
     const int skill_mult = apply_fighting_skill(weapon_skill_mult, false, false);
 
