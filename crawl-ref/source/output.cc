@@ -17,6 +17,8 @@
 #include "branch.h"
 #include "colour.h"
 #include "describe.h"
+#include "melee-attack.h"
+#include "ranged-attack.h"
 #ifndef USE_TILE_LOCAL
 #endif
 #include "english.h"
@@ -2294,6 +2296,65 @@ static int _god_status_colour(int default_colour)
     return default_colour;
 }
 
+// Helper function to get weapon to-hit and damage stats
+static string _get_weapon_stats_string(const item_def *weapon, bool is_melee)
+{
+    if (!weapon && !is_melee)
+        return ""; // No missile/throwing weapon
+    
+    string result;
+    
+    // Calculate to-hit
+    int to_hit = 0;
+    if (is_melee)
+    {
+        melee_attack attk(&you, nullptr);
+        if (weapon)
+        {
+            // set_weapon needs non-const, but we're only reading for calculations
+            attk.set_weapon(const_cast<item_def*>(weapon), false);
+        }
+        else
+        {
+            // For unarmed, weapon is already nullptr from constructor
+            // wpn_skill should be set to SK_UNARMED_COMBAT by set_weapon(nullptr)
+            attk.set_weapon(nullptr, false);
+        }
+        to_hit = attk.calc_pre_roll_to_hit(false);
+    }
+    else if (weapon)
+    {
+        if (weapon->base_type == OBJ_MISSILES)
+        {
+            ranged_attack attk(&you, nullptr, nullptr, weapon, false);
+            to_hit = attk.calc_pre_roll_to_hit(false);
+        }
+        else if (is_range_weapon(*weapon))
+        {
+            item_def fake_proj;
+            populate_fake_projectile(*weapon, fake_proj);
+            ranged_attack attk(&you, nullptr, weapon, &fake_proj, false);
+            to_hit = attk.calc_pre_roll_to_hit(false);
+        }
+    }
+    
+    // Get damage rating (just the numeric value for display)
+    int damage_rating_val = 0;
+    damage_rating(weapon, &damage_rating_val);
+    
+    // Format the string - use shorter format
+    if (is_melee)
+    {
+        result = make_stringf("Melee: +%d to hit, %d dmg", to_hit, damage_rating_val);
+    }
+    else
+    {
+        result = make_stringf("Missile: +%d to hit, %d dmg", to_hit, damage_rating_val);
+    }
+    
+    return result;
+}
+
 static vector<formatted_string> _get_overview_stats()
 {
     formatted_string entry;
@@ -2528,6 +2589,56 @@ static vector<formatted_string> _get_overview_stats()
             }
 
             cols.add_formatted(3, entry.to_colour_string(), false);
+            entry.clear();
+        }
+    }
+
+    // Weapon stats: melee and missile/throwing
+    {
+        // Get melee weapon (or unarmed)
+        const item_def *melee_weapon = you.weapon();
+        if (melee_weapon && is_range_weapon(*melee_weapon))
+            melee_weapon = nullptr; // Ranged weapon in hand, not melee
+        
+        // Get missile/throwing weapon from quiver or equipped ranged weapon
+        const item_def *missile_weapon = nullptr;
+        const item_def *equipped_weapon = you.weapon();
+        if (equipped_weapon && is_range_weapon(*equipped_weapon))
+        {
+            // Equipped ranged weapon (bow, crossbow, etc.) - use it with fake projectile
+            missile_weapon = equipped_weapon;
+        }
+        else if (!you.quiver_action.is_empty() && you.quiver_action.get()->is_valid())
+        {
+            // Check quiver for throwing weapons or missiles
+            int item_slot = you.quiver_action.get()->get_item();
+            if (item_slot >= 0 && item_slot < ENDOFPACK && you.inv[item_slot].defined())
+            {
+                const item_def &item = you.inv[item_slot];
+                if (item.base_type == OBJ_MISSILES)
+                {
+                    missile_weapon = &item;
+                }
+            }
+        }
+        
+        string melee_stats = _get_weapon_stats_string(melee_weapon, true);
+        string missile_stats = _get_weapon_stats_string(missile_weapon, false);
+        
+        if (!melee_stats.empty() || !missile_stats.empty())
+        {
+            entry.textcolour(HUD_CAPTION_COLOUR);
+            entry.cprintf("Weapons: ");
+            entry.textcolour(HUD_VALUE_COLOUR);
+            
+            if (!melee_stats.empty() && !missile_stats.empty())
+                entry.cprintf("%s | %s", melee_stats.c_str(), missile_stats.c_str());
+            else if (!melee_stats.empty())
+                entry.cprintf("%s", melee_stats.c_str());
+            else
+                entry.cprintf("%s", missile_stats.c_str());
+            
+            cols.add_formatted(0, entry.to_colour_string(), false);
             entry.clear();
         }
     }
