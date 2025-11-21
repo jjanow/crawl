@@ -6,6 +6,7 @@
 #include "AppHdr.h"
 
 #include "spl-cast.h"
+#include "spl-book.h"
 
 #include <iomanip>
 #include <sstream>
@@ -116,237 +117,45 @@ void surge_power_wand(const int mp_cost)
     }
 }
 
-static string _spell_base_description(spell_type spell, bool transient)
+
+
+static spell_lib_list _get_castable_spells()
 {
-    ostringstream desc;
-
-    int highlight =  spell_highlight_by_utility(spell, COL_UNKNOWN, transient);
-    if (you.duration[DUR_ENKINDLED] && highlight == COL_UNKNOWN
-        && spell_can_be_enkindled(spell))
-    {
-        highlight = LIGHTCYAN;
-    }
-
-    desc << "<" << colour_to_str(highlight) << ">" << left;
-
-    // spell name
-    desc << chop_string(spell_title(spell), 32);
-
-    // spell schools
-    desc << spell_schools_string(spell);
-
-    const int so_far = strwidth(desc.str()) - (strwidth(colour_to_str(highlight))+2);
-    if (so_far < 58)
-        desc << string(58 - so_far, ' ');
-
-    // spell fail rate, level
-    const string failure_rate = spell_failure_rate_string(spell, false);
-    const int width = strwidth(formatted_string::parse_string(failure_rate).tostring());
-    const bool show_enkindle = you.has_mutation(MUT_MNEMOPHAGE);
-
-    // Revenants have spell level right-justified instead of left-justified to make
-    // room to show enkindled spell success rates.
-    desc << failure_rate << string((show_enkindle ? 13 : 9)-width, ' ');
-    desc << spell_difficulty(spell);
-    // XXX: This exact padding is needed to make the webtiles spell menu not re-align
-    //      itself whenever we toggle display modes. For some reason, this doesn't
-    //      seem to matter for local tiles. Who know why?
-    desc << string(show_enkindle ? 2 : 6, ' ');
-    desc << "</" << colour_to_str(highlight) <<">";
-
-    return desc.str();
-}
-
-static string _spell_extra_description(spell_type spell, bool transient)
-{
-    ostringstream desc;
-
-    int highlight =  spell_highlight_by_utility(spell, COL_UNKNOWN, transient);
-    if (you.duration[DUR_ENKINDLED] && spell_can_be_enkindled(spell) && highlight == COL_UNKNOWN)
-        highlight = LIGHTCYAN;
-
-    desc << "<" << colour_to_str(highlight) << ">" << left;
-
-    // spell name
-    desc << chop_string(spell_title(spell), 32);
-
-    // spell power, spell range, noise
-    const string rangestring = spell_range_string(spell);
-    const string damagestring = spell_damage_string(spell, false, -1, true);
-
-    desc << chop_string(spell_power_string(spell), 10)
-         << chop_string(damagestring.length() ? damagestring : "N/A", 10)
-         << chop_string(rangestring, 8)
-         << chop_string(spell_noise_string(spell, 10), 14);
-
-    desc << "</" << colour_to_str(highlight) <<">";
-
-    return desc.str();
-}
-
-class SpellMenuEntry : public ToggleableMenuEntry
-{
-public:
-    SpellMenuEntry(const string &txt,
-                   const string &alt_txt,
-                   MenuEntryLevel lev,
-                   int qty, int hotk)
-        : ToggleableMenuEntry(txt, alt_txt, lev, qty, hotk)
-    {
-    }
-
-    bool preselected = false;
-protected:
-    virtual string _get_text_preface() const override
-    {
-        if (preselected)
-            return make_stringf(" %s + ", keycode_to_name(hotkeys[0]).c_str());
-        return ToggleableMenuEntry::_get_text_preface();
-    }
-};
-
-class SpellMenu : public ToggleableMenu
-{
-public:
-    SpellMenu()
-        : ToggleableMenu(MF_SINGLESELECT | MF_ANYPRINTABLE
-            | MF_NO_WRAP_ROWS | MF_ALLOW_FORMATTING
-            | MF_ARROWS_SELECT | MF_INIT_HOVER) {}
-protected:
-    command_type get_command(int keyin) override
-    {
-        if (keyin == '?')
-            return CMD_MENU_HELP;
-        return ToggleableMenu::get_command(keyin);
-    }
-
-    bool process_command(command_type cmd) override
-    {
-        if (cmd == CMD_MENU_HELP)
-        {
-            int idx = last_hovered;
-            if (idx >= 0 && idx < static_cast<int>(items.size()))
-            {
-                examine_index(idx);
-                return true;
-            }
-        }
-
-        get_selected(&sel);
-        // if there's a preselected item, and no current selection, select it.
-        // for arrow selection, the hover starts on the preselected item so no
-        // special handling is needed.
-        if (menu_action == ACT_EXECUTE && cmd == CMD_MENU_SELECT
-            && !(flags & MF_ARROWS_SELECT) && sel.empty())
-        {
-            for (size_t i = 0; i < items.size(); ++i)
-            {
-                if (static_cast<SpellMenuEntry*>(items[i])->preselected)
-                {
-                    select_index(i, 1);
-                    break;
-                }
-            }
-        }
-        return ToggleableMenu::process_command(cmd);
-    }
-
-    bool examine_index(int i) override
-    {
-        ASSERT(i >= 0 && i < static_cast<int>(items.size()));
-        if (items[i]->hotkeys.size())
-            describe_spell(get_spell_by_letter(items[i]->hotkeys[0]), nullptr);
-        return true;
-    }
-};
-
-// selector is a boolean function that filters spells according
-// to certain criteria. Currently used for Tiles to distinguish
-// spells targeted on player vs. spells targeted on monsters.
-int list_spells(bool toggle_with_I, bool transient, bool viewing,
-                bool allow_preselect, const string &action)
-{
-    if (toggle_with_I && get_spell_by_letter('I') != SPELL_NO_SPELL)
-        toggle_with_I = false;
-
-    const string real_action = viewing ? "describe" : action;
-
-    SpellMenu spell_menu;
-    const string titlestring = make_stringf("%-25.25s",
-            make_stringf("Your spells (%s)", real_action.c_str()).c_str());
-
-    {
-        ToggleableMenuEntry* me =
-            new ToggleableMenuEntry(
-                titlestring + "           Type                      Failure  Level  ",
-                titlestring + "           Power     Damage    Range   Noise         ",
-                MEL_TITLE);
-        spell_menu.set_title(me, true, true);
-    }
-    spell_menu.set_highlighter(nullptr);
-    spell_menu.set_tag("spell");
-    // TODO: add toggling to describe mode with `?`, add help string, etc...
-    spell_menu.add_toggle_from_command(CMD_MENU_CYCLE_MODE);
-    spell_menu.add_toggle_from_command(CMD_MENU_CYCLE_MODE_REVERSE);
-
-    string more_str = make_stringf("<lightgrey>Select a spell to %s</lightgrey>",
-        real_action.c_str());
-    more_str = pad_more_with_esc(more_str + "   [<w>?</w>] help");
-    string toggle_desc = menu_keyhelp_cmd(CMD_MENU_CYCLE_MODE);
-    if (toggle_with_I)
-    {
-        // why `I`?
-        spell_menu.add_toggle_key('I');
-        toggle_desc += "/[<w>I</w>]";
-    }
-    toggle_desc += " toggle spell headers";
-    more_str = pad_more_with(more_str, toggle_desc);
-    spell_menu.set_more(formatted_string::parse_string(more_str));
-    // TODO: should allow toggling between execute and examine
-    spell_menu.menu_action = viewing ? Menu::ACT_EXAMINE : Menu::ACT_EXECUTE;
-
-    int initial_hover = 0;
+    spell_lib_list spells;
     for (int i = 0; i < 52; ++i)
     {
         const char letter = index_to_letter(i);
         const spell_type spell = get_spell_by_letter(letter);
-
-        if (!is_valid_spell(spell))
-            continue;
-
-        SpellMenuEntry* me =
-            new SpellMenuEntry(_spell_base_description(spell, transient),
-                               _spell_extra_description(spell, transient),
-                               MEL_ITEM, 1, letter);
-        me->colour = spell_highlight_by_utility(spell, COL_UNKNOWN, transient);
-        // TODO: maybe fill this from the quiver if there's a quivered spell and
-        // no last cast one?
-        if (allow_preselect && you.last_cast_spell == spell)
-        {
-            initial_hover = i;
-            me->preselected = true;
-        }
-
-        me->add_tile(tile_def(tileidx_spell(spell)));
-        spell_menu.add_entry(me);
+        if (is_valid_spell(spell))
+            spells.emplace_back(spell);
     }
-    spell_menu.set_hovered(initial_hover);
+    return spells;
+}
 
-    int choice = 0;
-    spell_menu.on_single_selection = [&choice](const MenuEntry& item)
-    {
-        ASSERT(item.hotkeys.size() == 1);
-        choice = item.hotkeys[0];
-        return false;
-    };
+int list_spells(bool /*toggle_with_I*/, bool transient, bool viewing,
+                bool /*allow_preselect*/, const string &/*action*/)
+{
+    spell_lib_list spells = _get_castable_spells();
 
-    spell_menu.show();
+    SpellLibraryMenu::action act = viewing ? SpellLibraryMenu::action::describe
+                                           : SpellLibraryMenu::action::cast;
+
+    SpellLibraryMenu menu(spells, act, true);
+
+    vector<MenuEntry*> sel = menu.show(transient);
+
     if (!crawl_state.doing_prev_cmd_again)
     {
         redraw_screen();
         update_screen();
     }
-    return choice;
+
+    if (sel.empty()) return 0;
+
+    if (sel[0]->hotkeys.size() > 0)
+        return sel[0]->hotkeys[0];
+
+    return 0;
 }
 
 // Effects that happen after spells which are otherwise simple zaps.

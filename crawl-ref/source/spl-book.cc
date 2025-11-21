@@ -48,45 +48,16 @@
 #define RANDART_BOOK_TYPE_LEVEL "level"
 #define RANDART_BOOK_TYPE_THEME "theme"
 
-struct sortable_spell
+sortable_spell::sortable_spell(spell_type s) : spell(s),
+            raw_fail(raw_spell_fail(s)),
+            fail_rate(failure_rate_to_int(raw_fail)),
+            fail_rate_colour(failure_rate_colour(s)),
+            level(spell_levels_required(s)),
+            difficulty(spell_difficulty(s)),
+            name(spell_title(s)),
+            school(spell_schools_string(s))
 {
-    sortable_spell(spell_type s) : spell(s),
-                raw_fail(raw_spell_fail(s)),
-                fail_rate(failure_rate_to_int(raw_fail)),
-                fail_rate_colour(failure_rate_colour(s)),
-                level(spell_levels_required(s)),
-                difficulty(spell_difficulty(s)),
-                name(spell_title(s)),
-                school(spell_schools_string(s))
-    {
-    }
-
-    spell_type spell;
-    int raw_fail;
-    int fail_rate;
-    int fail_rate_colour;
-    int level;
-    int difficulty;
-    string name;
-    string school; // TODO: set?
-
-    friend bool operator==(const sortable_spell& x, const sortable_spell& y)
-    {
-        return x.spell == y.spell;
-    }
-};
-
-
-struct hash_sortable_spell
-{
-    spell_type operator()(const sortable_spell& s) const
-    {
-        return s.spell;
-    }
-};
-
-typedef vector<sortable_spell>                 spell_list;
-typedef unordered_set<spell_type, hash<int>>   spell_set;
+}
 
 static const map<wand_type, spell_type> _wand_spells =
 {
@@ -333,10 +304,10 @@ bool player_has_available_spells()
     return false;
 }
 
-static spell_list _get_spell_list(bool just_check = false,
-                                  bool memorise_only = true)
+spell_lib_list get_available_spell_list(bool just_check,
+                                  bool memorise_only)
 {
-    spell_list mem_spells;
+    spell_lib_list mem_spells;
     spell_set available_spells;
     _list_available_spells(available_spells);
 
@@ -458,7 +429,7 @@ bool library_add_spells(vector<spell_type> spells, bool quiet)
 bool has_spells_to_memorise(bool silent)
 {
     // TODO: this is a bit dumb
-    spell_list mem_spells(_get_spell_list(silent, true));
+    spell_lib_list mem_spells(get_available_spell_list(silent, true));
     return !mem_spells.empty();
 }
 #endif
@@ -513,7 +484,7 @@ static bool _sort_divine_spells(const sortable_spell &a, const sortable_spell &b
 
 vector<spell_type> get_sorted_spell_list(bool silent, bool memorise_only)
 {
-    spell_list mem_spells(_get_spell_list(silent, memorise_only));
+    spell_lib_list mem_spells(get_available_spell_list(silent, memorise_only));
 
     if (you.divine_exegesis)
         sort(mem_spells.begin(), mem_spells.end(), _sort_divine_spells);
@@ -527,413 +498,396 @@ vector<spell_type> get_sorted_spell_list(bool silent, bool memorise_only)
     return result;
 }
 
-class SpellLibraryMenu : public Menu
+formatted_string SpellLibraryMenu::calc_title()
 {
-public:
-    enum class action { cast, memorise, imbue, describe, hide, unhide };
-    action current_action, default_action;
+    return formatted_string::parse_string(
+                make_stringf("<w>Spells %s                   Type                      %sLevel",
+                    current_action == action::cast ? "(Cast)    "
+                    : current_action == action::memorise ? "(Memorise)"
+                    : current_action == action::describe ? "(Describe)"
+                    : current_action == action::hide ? "(Hide)    "
+                    : current_action == action::imbue ? "(Imbue)   "
+                    : "(Show)    ",
+                    you.divine_exegesis ? "         " : "Failure  "));
+}
 
-protected:
-    virtual formatted_string calc_title() override
+string SpellLibraryMenu::get_keyhelp(bool) const
+{
+    // TODO: convert this all to widgets, or just printf formatting, or
+    // *something* less convoluted and special cased
+    ostringstream desc;
+
+    // line 1
+    if (you.divine_exegesis)
     {
-        return formatted_string::parse_string(
-                    make_stringf("<w>Spells %s                   Type                      %sLevel",
-                        current_action == action::cast ? "(Cast)    "
-                        : current_action == action::memorise ? "(Memorise)"
-                        : current_action == action::describe ? "(Describe)"
-                        : current_action == action::hide ? "(Hide)    "
-                        : current_action == action::imbue ? "(Imbue)   "
-                        : "(Show)    ",
-                        you.divine_exegesis ? "         " : "Failure  "));
+        desc << make_stringf(
+            "<lightgreen>Casting with Divine Exegesis: %d MP available</lightgreen>",
+            you.magic_points);
+    }
+    else
+        desc << spell_levels_str;
+
+    // divine exegesis doesn't have space
+    if (hidden_count && (!you.divine_exegesis || !search_text.size()))
+    {
+        desc << std::right << std::setw(5)
+             << hidden_count
+             << (hidden_count > 1 ? " spells hidden" : " spell hidden ")
+             << "   ";
+    }
+    else
+        desc << "   ";
+
+    if (search_text.size())
+    {
+        int max_size = you.divine_exegesis ? 22 : 47;
+        if (!you.divine_exegesis && hidden_count)
+            max_size -= 19;
+        const bool search_overflow =
+                        static_cast<int>(search_text.size()) > max_size;
+        desc << make_stringf("Matches: <w>%.*s%s</w>",
+                        search_overflow ? max_size - 2 : max_size,
+                        replace_all(search_text, "<", "<<").c_str(),
+                        search_overflow ? ".." : "");
     }
 
-private:
-    spell_list& spells;
-    string spell_levels_str;
-    string search_text;
-    int hidden_count;
+    desc << "\n";
 
-    // void update_more()
-    string get_keyhelp(bool) const override
+    const string act = default_action == action::memorise ? "Memorise"
+                       : default_action == action::imbue ? "Imbue" : "Cast";
+    // line 2
+    desc << menu_keyhelp_cmd(CMD_MENU_CYCLE_MODE) << " ";
+    desc << ( current_action == action::cast
+                        ? "<w>Cast</w>|Describe|Hide|Show"
+             : current_action == action::memorise
+                        ? "<w>Memorise</w>|Describe|Hide|Show"
+             : current_action == action::imbue
+                        ? "<w>Imbue</w>|Describe|Hide|Show"
+             : current_action == action::describe
+                        ? act + "|<w>Describe</w>|Hide|Show"
+             : current_action == action::hide
+                        ? act + "|Describe|<w>Hide</w>|Show"
+             : act + "|Describe|Hide|<w>Show</w>");
+    desc << "   " << menu_keyhelp_cmd(CMD_MENU_SEARCH) << " search"
+            "   [<w>?</w>] help"; // XX hardcoded for this menu
+
+    if (search_text.size())
+        return pad_more_with(desc.str(), "[<w>Esc</w>] clear"); // esc is hardcoded for this case
+    else
+        return pad_more_with_esc(desc.str());
+}
+
+bool SpellLibraryMenu::cycle_mode(bool forward)
+{
+    bool entries_changed = false;
+    // completely replace superclass mode implementation
+    if (forward)
     {
-        // TODO: convert this all to widgets, or just printf formatting, or
-        // *something* less convoluted and special cased
-        ostringstream desc;
-
-        // line 1
-        if (you.divine_exegesis)
+        switch (current_action)
         {
-            desc << make_stringf(
-                "<lightgreen>Casting with Divine Exegesis: %d MP available</lightgreen>",
-                you.magic_points);
-        }
-        else
-            desc << spell_levels_str;
-
-        // divine exegesis doesn't have space
-        if (hidden_count && (!you.divine_exegesis || !search_text.size()))
-        {
-            desc << std::right << std::setw(5)
-                 << hidden_count
-                 << (hidden_count > 1 ? " spells hidden" : " spell hidden ")
-                 << "   ";
-        }
-        else
-            desc << "   ";
-
-        if (search_text.size())
-        {
-            int max_size = you.divine_exegesis ? 22 : 47;
-            if (!you.divine_exegesis && hidden_count)
-                max_size -= 19;
-            const bool search_overflow =
-                            static_cast<int>(search_text.size()) > max_size;
-            desc << make_stringf("Matches: <w>%.*s%s</w>",
-                            search_overflow ? max_size - 2 : max_size,
-                            replace_all(search_text, "<", "<<").c_str(),
-                            search_overflow ? ".." : "");
-        }
-
-        desc << "\n";
-
-        const string act = default_action == action::memorise ? "Memorise"
-                           : default_action == action::imbue ? "Imbue" : "Cast";
-        // line 2
-        desc << menu_keyhelp_cmd(CMD_MENU_CYCLE_MODE) << " ";
-        desc << ( current_action == action::cast
-                            ? "<w>Cast</w>|Describe|Hide|Show"
-                 : current_action == action::memorise
-                            ? "<w>Memorise</w>|Describe|Hide|Show"
-                 : current_action == action::imbue
-                            ? "<w>Imbue</w>|Describe|Hide|Show"
-                 : current_action == action::describe
-                            ? act + "|<w>Describe</w>|Hide|Show"
-                 : current_action == action::hide
-                            ? act + "|Describe|<w>Hide</w>|Show"
-                 : act + "|Describe|Hide|<w>Show</w>");
-        desc << "   " << menu_keyhelp_cmd(CMD_MENU_SEARCH) << " search"
-                "   [<w>?</w>] help"; // XX hardcoded for this menu
-
-        if (search_text.size())
-            return pad_more_with(desc.str(), "[<w>Esc</w>] clear"); // esc is hardcoded for this case
-        else
-            return pad_more_with_esc(desc.str());
-    }
-
-    bool cycle_mode(bool forward) override
-    {
-        bool entries_changed = false;
-        // completely replace superclass mode implementation
-        if (forward)
-        {
-            switch (current_action)
-            {
-                case action::cast:
-                case action::memorise:
-                case action::imbue:
-                    current_action = action::describe;
-                    entries_changed = true; // need to add hotkeys
-                    break;
-                case action::describe:
-                    current_action = action::hide;
-                    break;
-                case action::hide:
-                    current_action = action::unhide;
-                    entries_changed = true;
-                    if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
-                        last_hovered = 0;
-                    break;
-                case action::unhide:
-                    current_action = default_action;
-                    entries_changed = true;
-                    if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
-                        last_hovered = 0;
-                    break;
-            }
-        }
-        else
-        {
-            switch (current_action)
-            {
-                case action::cast:
-                case action::memorise:
-                case action::imbue:
-                    current_action = action::unhide;
-                    entries_changed = true;
-                    if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
-                        last_hovered = 0;
-                    break;
-                case action::describe:
-                    current_action = default_action;
-                    entries_changed = true; // may need to remove hotkeys
-                    break;
-                case action::hide:
-                    current_action = action::describe;
-                    break;
-                case action::unhide:
-                    current_action = action::hide;
-                    entries_changed = true;
-                    if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
-                        last_hovered = 0;
-                    break;
-            }
-        }
-        update_title();
-        if (entries_changed)
-            update_entries();
-        update_more();
-        return true;
-    }
-
-    command_type get_command(int keyin) override
-    {
-        if (keyin == '?')
-            return CMD_MENU_HELP;
-        return Menu::get_command(keyin);
-    }
-
-    virtual bool process_command(command_type cmd) override
-    {
-        bool entries_changed = false;
-        switch (cmd)
-        {
-        case CMD_MENU_SEARCH:
-        {
-            char linebuf[80] = "";
-            const bool validline = title_prompt(linebuf, sizeof linebuf,
-                                                "Search for what? (regex) ");
-            string old_search = search_text;
-            if (validline)
-                search_text = linebuf;
-            else
-                search_text = "";
-            entries_changed = old_search != search_text;
-            break;
-        }
-        case CMD_MENU_HELP:
-            show_spell_library_help();
-            break;
-        case CMD_MENU_EXIT:
-            // if we are in a search, exit the search, not the menu
-            // TODO: can this be generalized to the superclass?
-            if (search_text.size())
-            {
-                search_text = "";
-                entries_changed = true;
+            case action::cast:
+            case action::memorise:
+            case action::imbue:
+                current_action = action::describe;
+                entries_changed = true; // need to add hotkeys
                 break;
-            }
-            // otherwise, fallthrough to default handling
-        default:
-            return Menu::process_command(cmd);
+            case action::describe:
+                current_action = action::hide;
+                break;
+            case action::hide:
+                current_action = action::unhide;
+                entries_changed = true;
+                if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
+                    last_hovered = 0;
+                break;
+            case action::unhide:
+                current_action = default_action;
+                entries_changed = true;
+                if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
+                    last_hovered = 0;
+                break;
         }
-
-        if (entries_changed)
+    }
+    else
+    {
+        switch (current_action)
         {
-            update_entries();
-            update_more();
+            case action::cast:
+            case action::memorise:
+            case action::imbue:
+                current_action = action::unhide;
+                entries_changed = true;
+                if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
+                    last_hovered = 0;
+                break;
+            case action::describe:
+                current_action = default_action;
+                entries_changed = true; // may need to remove hotkeys
+                break;
+            case action::hide:
+                current_action = action::describe;
+                break;
+            case action::unhide:
+                current_action = action::hide;
+                entries_changed = true;
+                if (last_hovered >= 0 && is_set(MF_ARROWS_SELECT))
+                    last_hovered = 0;
+                break;
         }
-        return true;
+    }
+    update_title();
+    if (entries_changed)
+        update_entries();
+    update_more();
+    return true;
+}
+
+command_type SpellLibraryMenu::get_command(int keyin)
+{
+    if (keyin == '?')
+        return CMD_MENU_HELP;
+    return Menu::get_command(keyin);
+}
+
+bool SpellLibraryMenu::process_command(command_type cmd)
+{
+    bool entries_changed = false;
+    switch (cmd)
+    {
+    case CMD_MENU_SEARCH:
+    {
+        char linebuf[80] = "";
+        const bool validline = title_prompt(linebuf, sizeof linebuf,
+                                            "Search for what? (regex) ");
+        string old_search = search_text;
+        if (validline)
+            search_text = linebuf;
+        else
+            search_text = "";
+        entries_changed = old_search != search_text;
+        break;
+    }
+    case CMD_MENU_HELP:
+        show_spell_library_help();
+        break;
+    case CMD_MENU_EXIT:
+        // if we are in a search, exit the search, not the menu
+        // TODO: can this be generalized to the superclass?
+        if (search_text.size())
+        {
+            search_text = "";
+            entries_changed = true;
+            break;
+        }
+        // otherwise, fallthrough to default handling
+    default:
+        return Menu::process_command(cmd);
     }
 
-    colour_t entry_colour(const sortable_spell& entry)
+    if (entries_changed)
     {
-        if (vehumet_is_offering(entry.spell, true))
-            return LIGHTBLUE;
+        update_entries();
+        update_more();
+    }
+    return true;
+}
+
+colour_t SpellLibraryMenu::entry_colour(const sortable_spell& entry)
+{
+    if (vehumet_is_offering(entry.spell, true))
+        return LIGHTBLUE;
+    else
+    {
+        return spell_highlight_by_utility(entry.spell, COL_UNKNOWN, false,
+                you.divine_exegesis ? false : true);
+    }
+}
+
+void SpellLibraryMenu::update_entries()
+{
+    // try to keep the hover on the current spell. (Maybe this is too
+    // complicated?)
+    ASSERT(last_hovered < static_cast<int>(items.size()));
+    int new_hover = last_hovered;
+    const spell_type hovered_spell =
+        last_hovered >= 0 && items[last_hovered]->data
+            ? *static_cast<spell_type *>(items[last_hovered]->data)
+            : SPELL_NO_SPELL;
+    clear();
+    hidden_count = 0;
+    const bool show_hidden = current_action == action::unhide;
+    const bool show_enkindle = you.has_mutation(MUT_MNEMOPHAGE);
+    menu_letter hotkey;
+    text_pattern pat(search_text, true);
+    for (auto& spell : spells)
+    {
+        if (!search_text.empty()
+            && !pat.matches(spell.name)
+            && !pat.matches(spell.school))
+        {
+            continue;
+        }
+
+        const bool spell_hidden = you.hidden_spells.get(spell.spell);
+
+        if (spell_hidden)
+            hidden_count++;
+
+        if (spell_hidden != show_hidden)
+            continue;
+
+        // TODO: it might be cleaner to reorder and put unavailable spells
+        // under a different category
+        // n.b. this memorise code only checks spell-specific constraints,
+        // so it adds hotkeys e.g. if you lack the spell levels. Not sure
+        // if this is intentional.
+        const bool unavailable = current_action == action::memorise &&
+                                    !you_can_memorise(spell.spell)
+                            || current_action == action::cast &&
+                                spell_is_useless(spell.spell, true, true);
+
+        const colour_t colour = unavailable ? (colour_t) DARKGRAY
+                                            : entry_colour(spell);
+
+        ostringstream desc;
+        desc << "<" << colour_to_str(colour) << ">";
+
+        desc << left;
+        desc << chop_string(spell.name, 32);
+        desc << spell.school;
+
+        int so_far = strwidth(desc.str()) - (colour_to_str(colour).length()+2);
+        if (so_far < 58)
+            desc << string(58 - so_far, ' ');
+        desc << "</" << colour_to_str(colour) << ">";
+
+        if (you.divine_exegesis)
+            desc << string(9, ' ');
+        else if (show_enkindle && spell_can_be_enkindled(spell.spell))
+        {
+            const int enkindled_fail = failure_rate_to_int(raw_spell_fail(spell.spell, true));
+
+            const string fail_string = make_stringf("<%s>%d%%</%s><darkgrey> (%d%%)</darkgrey>",
+                                                        colour_to_str(spell.fail_rate_colour).c_str(),
+                                                        failure_rate_to_int(spell.raw_fail),
+                                                        colour_to_str(spell.fail_rate_colour).c_str(),
+                                                        enkindled_fail);
+
+            const int width = strwidth(formatted_string::parse_string(fail_string).tostring());
+            desc << fail_string << string(13 - width, ' ');
+        }
         else
         {
-            return spell_highlight_by_utility(entry.spell, COL_UNKNOWN, false,
-                    you.divine_exegesis ? false : true);
+            desc << "<" << colour_to_str(spell.fail_rate_colour) << ">";
+            desc << chop_string(failure_rate_to_string(spell.raw_fail), show_enkindle ? 13 : 9);
+            desc << "</" << colour_to_str(spell.fail_rate_colour) << ">";
         }
-    }
 
-    // Update the list of spells. If show_hidden is true, show only hidden
-    // ones; otherwise, show only non-hidden ones.
-    void update_entries()
-    {
-        // try to keep the hover on the current spell. (Maybe this is too
-        // complicated?)
-        ASSERT(last_hovered < static_cast<int>(items.size()));
-        int new_hover = last_hovered;
-        const spell_type hovered_spell =
-            last_hovered >= 0 && items[last_hovered]->data
-                ? *static_cast<spell_type *>(items[last_hovered]->data)
-                : SPELL_NO_SPELL;
-        clear();
-        hidden_count = 0;
-        const bool show_hidden = current_action == action::unhide;
-        const bool show_enkindle = you.has_mutation(MUT_MNEMOPHAGE);
-        menu_letter hotkey;
-        text_pattern pat(search_text, true);
-        for (auto& spell : spells)
-        {
-            if (!search_text.empty()
-                && !pat.matches(spell.name)
-                && !pat.matches(spell.school))
-            {
-                continue;
-            }
-
-            const bool spell_hidden = you.hidden_spells.get(spell.spell);
-
-            if (spell_hidden)
-                hidden_count++;
-
-            if (spell_hidden != show_hidden)
-                continue;
-
-            // TODO: it might be cleaner to reorder and put unavailable spells
-            // under a different category
-            // n.b. this memorise code only checks spell-specific constraints,
-            // so it adds hotkeys e.g. if you lack the spell levels. Not sure
-            // if this is intentional.
-            const bool unavailable = current_action == action::memorise &&
-                                        !you_can_memorise(spell.spell)
-                                || current_action == action::cast &&
-                                    spell_is_useless(spell.spell, true, true);
-
-            const colour_t colour = unavailable ? (colour_t) DARKGRAY
-                                                : entry_colour(spell);
-
-            ostringstream desc;
-            desc << "<" << colour_to_str(colour) << ">";
-
-            desc << left;
-            desc << chop_string(spell.name, 32);
-            desc << spell.school;
-
-            int so_far = strwidth(desc.str()) - (colour_to_str(colour).length()+2);
-            if (so_far < 58)
-                desc << string(58 - so_far, ' ');
-            desc << "</" << colour_to_str(colour) << ">";
-
-            if (you.divine_exegesis)
-                desc << string(9, ' ');
-            else if (show_enkindle && spell_can_be_enkindled(spell.spell))
-            {
-                const int enkindled_fail = failure_rate_to_int(raw_spell_fail(spell.spell, true));
-
-                const string fail_string = make_stringf("<%s>%d%%</%s><darkgrey> (%d%%)</darkgrey>",
-                                                            colour_to_str(spell.fail_rate_colour).c_str(),
-                                                            failure_rate_to_int(spell.raw_fail),
-                                                            colour_to_str(spell.fail_rate_colour).c_str(),
-                                                            enkindled_fail);
-
-                const int width = strwidth(formatted_string::parse_string(fail_string).tostring());
-                desc << fail_string << string(13 - width, ' ');
-            }
-            else
-            {
-                desc << "<" << colour_to_str(spell.fail_rate_colour) << ">";
-                desc << chop_string(failure_rate_to_string(spell.raw_fail), show_enkindle ? 13 : 9);
-                desc << "</" << colour_to_str(spell.fail_rate_colour) << ">";
-            }
-
-            desc << spell.difficulty;
+        desc << spell.difficulty;
 
             MenuEntry* me = new MenuEntry(desc.str(), MEL_ITEM, 1,
                     // don't add a hotkey if you can't memorise/cast it
-                    unavailable ? 0 : char(hotkey));
-            // But do increment hotkeys anyway, to keep the hotkeys consistent.
-            ++hotkey;
+                    unavailable ? 0 : (use_spell_letters ? get_spell_letter(spell.spell) : char(hotkey)));
+        // But do increment hotkeys anyway, to keep the hotkeys consistent.
+        ++hotkey;
 
-            me->indent_no_hotkeys = true;
-            me->colour = colour;
-            me->add_tile(tile_def(tileidx_spell(spell.spell)));
+        me->indent_no_hotkeys = true;
+        me->colour = colour;
+        me->add_tile(tile_def(tileidx_spell(spell.spell)));
 
-            me->data = &(spell.spell);
-            add_entry(me);
-            if (hovered_spell == spell.spell)
-                new_hover = items.size() - 1;
+        me->data = &(spell.spell);
+        add_entry(me);
+        if (hovered_spell == spell.spell)
+            new_hover = items.size() - 1;
 
-        }
-        reset();
-        set_hovered(new_hover);
-        update_menu(true);
     }
+    reset();
+    set_hovered(new_hover);
+    update_menu(true);
+}
 
-public:
-    SpellLibraryMenu(spell_list& list, action _default_action)
-        : Menu(MF_SINGLESELECT | MF_ALLOW_FORMATTING
-                | MF_ARROWS_SELECT | MF_INIT_HOVER | MF_SHOW_EMPTY
-                // To have the ctrl-f menu show up in webtiles
-                | MF_ALLOW_FILTER, "spell"),
-        current_action(_default_action),
-        default_action(_default_action),
-        spells(list),
-        hidden_count(0)
+SpellLibraryMenu::SpellLibraryMenu(spell_lib_list& list, action _default_action, bool _use_spell_letters)
+    : Menu(MF_SINGLESELECT | MF_ALLOW_FORMATTING
+            | MF_ARROWS_SELECT | MF_INIT_HOVER | MF_SHOW_EMPTY
+            // To have the ctrl-f menu show up in webtiles
+            | MF_ALLOW_FILTER, "spell"),
+    current_action(_default_action),
+    default_action(_default_action),
+    spells(list),
+    hidden_count(0),
+    use_spell_letters(_use_spell_letters)
+{
+    set_highlighter(nullptr);
+    // Actual text handled by calc_title
+    set_title(new MenuEntry(""), true, true);
+
+    if (you.divine_exegesis)
     {
-        set_highlighter(nullptr);
-        // Actual text handled by calc_title
-        set_title(new MenuEntry(""), true, true);
-
-        if (you.divine_exegesis)
-        {
-            spell_levels_str = make_stringf(
-                "<lightgreen>Select a spell to cast with Divine Exegesis: %d MP available</lightgreen>",
-                you.magic_points);
-        }
-        else if (default_action == action::imbue)
-            spell_levels_str = "<lightgreen>Select a spell to imbue your Spellspark Servitor with:</lightgreen>";
-        else
-        {
-            spell_levels_str = make_stringf("<lightgreen>%d spell level%s"
-                        "</lightgreen>", player_spell_levels(),
-                        (player_spell_levels() > 1 || player_spell_levels() == 0)
-                                                    ? "s left" : " left ");
-            if (player_spell_levels() < 9)
-                spell_levels_str += " ";
-        }
+        spell_levels_str = make_stringf(
+            "<lightgreen>Select a spell to cast with Divine Exegesis: %d MP available</lightgreen>",
+            you.magic_points);
+    }
+    else if (default_action == action::imbue)
+        spell_levels_str = "<lightgreen>Select a spell to imbue your Spellspark Servitor with:</lightgreen>";
+    else
+    {
+        spell_levels_str = make_stringf("<lightgreen>%d spell level%s"
+                    "</lightgreen>", player_spell_levels(),
+                    (player_spell_levels() > 1 || player_spell_levels() == 0)
+                                                ? "s left" : " left ");
+        if (player_spell_levels() < 9)
+            spell_levels_str += " ";
+    }
 
 #ifdef USE_TILE_LOCAL
-        FontWrapper *font = tiles.get_crt_font();
-        int title_width = font->string_width(calc_title());
-        m_ui.vbox->min_size().width = 38 + title_width + 10;
+    FontWrapper *font = tiles.get_crt_font();
+    int title_width = font->string_width(calc_title());
+    m_ui.vbox->min_size().width = 38 + title_width + 10;
 #endif
-        m_ui.scroller->expand_v = true; // TODO: doesn't work on webtiles
+    m_ui.scroller->expand_v = true; // TODO: doesn't work on webtiles
 
-        update_entries();
-        update_more();
+    update_entries();
+    update_more();
 
-        on_examine = [](const MenuEntry& item)
+    on_examine = [](const MenuEntry& item)
+    {
+        const spell_type spell = *static_cast<spell_type*>(item.data);
+        ASSERT(is_valid_spell(spell));
+        describe_spell(spell, nullptr);
+        return true;
+    };
+
+    on_single_selection = [this](const MenuEntry& item)
+    {
+        const spell_type spell = *static_cast<spell_type*>(item.data);
+        ASSERT(is_valid_spell(spell));
+
+        switch (current_action)
         {
-            const spell_type spell = *static_cast<spell_type*>(item.data);
-            ASSERT(is_valid_spell(spell));
-            describe_spell(spell, nullptr);
-            return true;
-        };
+        case action::memorise:
+        case action::cast:
+        case action::imbue:
+            return false;
+        case action::describe:
+            // n.b. skip superclass handling of ACT_EXAMINE, since we
+            // do not use `menu_action` in this class
+            // hacky: call this by hotkey in order to trigger some side
+            // effects...
+            if (item.hotkeys.size())
+                return examine_by_key(item.hotkeys[0]);
+        case action::hide:
+        case action::unhide:
+            you.hidden_spells.set(spell, !you.hidden_spells.get(spell));
+            update_entries();
+            update_menu(true);
+            update_more();
+            break;
+        }
+        return true;
+    };
+}
 
-        on_single_selection = [this](const MenuEntry& item)
-        {
-            const spell_type spell = *static_cast<spell_type*>(item.data);
-            ASSERT(is_valid_spell(spell));
-
-            switch (current_action)
-            {
-            case action::memorise:
-            case action::cast:
-            case action::imbue:
-                return false;
-            case action::describe:
-                // n.b. skip superclass handling of ACT_EXAMINE, since we
-                // do not use `menu_action` in this class
-                // hacky: call this by hotkey in order to trigger some side
-                // effects...
-                if (item.hotkeys.size())
-                    return examine_by_key(item.hotkeys[0]);
-            case action::hide:
-            case action::unhide:
-                you.hidden_spells.set(spell, !you.hidden_spells.get(spell));
-                update_entries();
-                update_menu(true);
-                update_more();
-                break;
-            }
-            return true;
-        };
-    }
-};
-
-static spell_type _choose_mem_spell(spell_list &spells)
+static spell_type _choose_mem_spell(spell_lib_list &spells)
 {
     // If we've gotten this far, we know that at least one spell here is
     // memorisable, which is enough.
@@ -974,7 +928,7 @@ bool can_learn_spell(bool silent)
 
 bool learn_spell()
 {
-    spell_list spells(_get_spell_list());
+    spell_lib_list spells(get_available_spell_list());
     if (spells.empty())
         return false;
 
@@ -1154,7 +1108,7 @@ spret divine_exegesis(bool fail)
 {
     unwind_var<bool> dk(you.divine_exegesis, true);
 
-    spell_list spells(_get_spell_list(true, true));
+    spell_lib_list spells(get_available_spell_list(true, true));
     if (spells.empty())
     {
         mpr("You don't know of any spells!");
@@ -1185,9 +1139,9 @@ spret divine_exegesis(bool fail)
     return cast_a_spell(false, spell, nullptr, fail);
 }
 
-static spell_list _get_player_servitor_spells()
+static spell_lib_list _get_player_servitor_spells()
 {
-    spell_list spells;
+    spell_lib_list spells;
     for (const spell_type spell : you.spells)
         if (spell_servitorable(spell) && failure_rate_to_int(raw_spell_fail(spell)) <= 20)
             spells.push_back(spell);
@@ -1197,7 +1151,7 @@ static spell_list _get_player_servitor_spells()
 
 spret imbue_servitor()
 {
-    spell_list spells(_get_player_servitor_spells());
+    spell_lib_list spells(_get_player_servitor_spells());
     if (spells.empty())
     {
         mpr("You don't know any spells that your servitor could cast!");
