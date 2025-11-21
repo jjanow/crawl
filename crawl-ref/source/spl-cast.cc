@@ -846,7 +846,8 @@ spret cast_a_spell(bool check_range, spell_type spell, dist *_target,
 
         while (true)
         {
-            if (keyin == 0 && !Options.spell_menu)
+            // if (keyin == 0 && !Options.spell_menu)
+            if (false)
             {
                 if (you.spell_no == 1)
                 {
@@ -890,7 +891,7 @@ spret cast_a_spell(bool check_range, spell_type spell, dist *_target,
                 keyin = numpad_to_regular(get_ch());
             }
 
-            if (keyin == '?' || keyin == '*' || Options.spell_menu)
+            if (keyin == '?' || keyin == '*' || true)
             {
                 keyin = list_spells(true, true, false);
                 if (!keyin)
