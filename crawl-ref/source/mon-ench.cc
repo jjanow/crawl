@@ -1646,21 +1646,8 @@ void monster::apply_enchantment(const mon_enchant &me)
             if (has_ench(ENCH_SEVERED))
                 break;
 
-            if (!friendly())
-                break;
-
-            if (!silenced(you.pos()))
-            {
-                if (you.can_see(*this))
-                    simple_monster_message(*this, " suddenly becomes enraged!");
-                else
-                    mpr("You hear a distant and violent thrashing sound.");
-            }
-
-            attitude = ATT_HOSTILE;
-            mons_att_changed(this);
-            if (!crawl_state.game_is_arena())
-                behaviour_event(this, ME_ALERT, &you);
+            simple_monster_message(*this, " vanishes!");
+            monster_die(*this, KILL_DISMISSED, NON_MONSTER);
         }
     }
     break;

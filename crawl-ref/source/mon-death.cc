@@ -1381,6 +1381,8 @@ static string _killer_type_name(killer_type killer)
         return "reset_keep_items";
     case KILL_BANISHED:
         return "banished";
+    case KILL_DISMISSED:
+        return "dismissed";
     case KILL_TIMEOUT:
         return "timeout";
 #if TAG_MAJOR_VERSION == 34

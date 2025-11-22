@@ -1681,6 +1681,7 @@ kill_category cloud_struct::killer_to_whose(killer_type _killer)
         case KILL_MON:
         case KILL_MON_MISSILE:
         case KILL_NON_ACTOR:
+        case KILL_DISMISSED:
             return KC_OTHER;
 
         default:
