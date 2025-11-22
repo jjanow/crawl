@@ -7,7 +7,7 @@
 {'-', CMD_EDIT_PLAYER_TILE},
 #endif
 // movement keys
-{'s', CMD_WAIT},
+{'s', CMD_REPEAT_SPELL},
 {CK_CLEAR, CMD_WAIT},
 {CK_NUMPAD_DECIMAL, CMD_WAIT},
 {CK_DELETE, CMD_WAIT},

@@ -560,6 +560,74 @@ void do_cast_spell_cmd(bool force)
         flush_input_buffer(FLUSH_ON_FAILURE);
 }
 
+void do_repeat_spell_cmd()
+{
+    if (you.last_cast_spell == SPELL_NO_SPELL)
+    {
+        mpr("You haven't cast a spell yet.");
+        return;
+    }
+
+    const spell_type spell = you.last_cast_spell;
+
+    // Basic capability check (silence, confusion, etc.)
+    if (!can_cast_spells())
+        return;
+
+    // Check MP
+    if (you.magic_points < spell_mana(spell))
+    {
+        mpr("You don't have enough magic to cast that spell.");
+        return;
+    }
+
+    dist target;
+    bool target_found = false;
+
+    if (you.prev_targ == MID_PLAYER)
+    {
+        target.target = you.pos();
+        target.isTarget = true;
+        target.isValid = true;
+        target.interactive = false;
+        target_found = true;
+    }
+    else if (you.prev_targ != MID_NOBODY)
+    {
+        const monster* m = monster_by_mid(you.prev_targ);
+        if (m && you.can_see(*m))
+        {
+             target.target = m->pos();
+             target.isTarget = true;
+             target.isValid = true;
+             target.interactive = false;
+             target_found = true;
+        }
+    }
+
+    if (!target_found && you.prev_grd_targ != coord_def(0,0))
+    {
+        if (map_bounds(you.prev_grd_targ) && you.see_cell(you.prev_grd_targ))
+        {
+            target.target = you.prev_grd_targ;
+            target.isTarget = true;
+            target.isValid = true;
+            target.interactive = false;
+            target_found = true;
+        }
+    }
+
+    if (!target_found)
+    {
+        // Do nothing if target is gone/invalid.
+        return;
+    }
+
+    // Execute the spell with the fixed target.
+    if (cast_a_spell(true, spell, &target, false) == spret::abort)
+        flush_input_buffer(FLUSH_ON_FAILURE);
+}
+
 static void _handle_channelling(int cost, spret cast_result)
 {
     if (you.has_mutation(MUT_HP_CASTING) || cast_result == spret::abort)
