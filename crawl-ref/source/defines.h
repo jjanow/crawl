@@ -182,7 +182,7 @@ const int UNUSABLE_SKILL = -99;
 
 const int AGILITY_BONUS = 5;
 
-#define POLAR_VORTEX_RADIUS 5
+#define POLAR_VORTEX_RADIUS 12
 
 #define ZOT_ENTRY_RUNES 3
 

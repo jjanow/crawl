@@ -175,6 +175,7 @@ static const vector<spell_type> spellbook_templates[] =
 #endif
 
 {   // Book of the Warp
+    SPELL_CONTROLLED_BLINK,
     SPELL_DISPERSAL,
     SPELL_MANIFOLD_ASSAULT,
     SPELL_DISJUNCTION,
@@ -449,6 +450,7 @@ static const vector<spell_type> spellbook_templates[] =
 
 { // There-And-Back Book
     SPELL_TELEPORT_OTHER,
+    SPELL_CONTROLLED_BLINK,
     SPELL_GELLS_GAVOTTE,
     SPELL_DISPERSAL,
 },

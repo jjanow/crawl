@@ -1032,6 +1032,9 @@ int spell_range(spell_type spell, int pow,
     if (maxrange < 0)
         return maxrange;
 
+    if (spell == SPELL_POLAR_VORTEX)
+        return maxrange;
+
     if (allow_bonus
         && vehumet_supports_spell(spell)
         && have_passive(passive_t::spells_range)
