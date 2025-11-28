@@ -574,12 +574,9 @@ void do_repeat_spell_cmd()
     if (!can_cast_spells())
         return;
 
-    // Check MP
-    if (you.magic_points < spell_mana(spell))
-    {
-        mpr("You don't have enough magic to cast that spell.");
+    // Check MP/HP (enough_mp handles HP_CASTING mutation automatically)
+    if (!enough_mp(spell_mana(spell), false, false))
         return;
-    }
 
     dist target;
     bool target_found = false;
