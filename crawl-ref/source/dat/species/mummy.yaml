@@ -6,37 +6,37 @@ difficulty_priority: 20
 species_flags:
   - no_blood
 aptitudes:
-  xp: -1
-  hp: 0
-  mp_mod: 0
-  wl: 5
-  short_blades: -2
-  long_blades: -2
-  axes: -2
-  maces_and_flails: -2
-  polearms: -2
-  staves: -2
-  ranged weapons: -2
-  throwing: -2
-  armour: -2
-  dodging: -2
-  stealth: -1
-  shields: -2
-  unarmed_combat: -2
-  spellcasting: 2
-  conjurations: -2
-  hexes: -1
-  summoning: -2
-  forgecraft: -2
-  translocations: -2
+  xp: 1
+  hp: 2
+  mp_mod: 2
+  wl: 7
+  short_blades: 0
+  long_blades: 0
+  axes: 0
+  maces_and_flails: 0
+  polearms: 0
+  staves: 0
+  ranged weapons: 0
+  throwing: 0
+  armour: 0
+  dodging: 0
+  stealth: 1
+  shields: 0
+  unarmed_combat: 0
+  spellcasting: 4
+  conjurations: 0
+  hexes: 1
+  summoning: 0
+  forgecraft: 0
+  translocations: 0
   shapeshifting: False
-  fire_magic: -2
-  ice_magic: -2
-  air_magic: -2
-  earth_magic: -2
-  alchemy: -2
-  invocations: -1
-  evocations: -2
+  fire_magic: 0
+  ice_magic: 0
+  air_magic: 0
+  earth_magic: 0
+  alchemy: 0
+  invocations: 1
+  evocations: 0
 undead_type: undead
 str: 11
 int: 7
