@@ -2538,9 +2538,6 @@ int get_armour_willpower(const item_def &arm, bool check_artp)
     if (get_armour_ego_type(arm) == SPARM_WILLPOWER)
         res += WL_PIP;
 
-    if (get_armour_ego_type(arm) == SPARM_GUILE)
-        res -= 2 * WL_PIP;
-
     if (check_artp && is_artefact(arm))
         res += WL_PIP * artefact_property(arm, ARTP_WILLPOWER);
 

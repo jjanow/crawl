@@ -324,8 +324,6 @@ int raw_spell_fail(spell_type spell, bool enkindled)
     chance2 -= 2 * you.get_mutation_level(MUT_SUBDUED_MAGIC);
     chance2 += 4 * you.get_mutation_level(MUT_WILD_MAGIC);
     chance2 += 4 * you.get_mutation_level(MUT_ANTI_WIZARDRY);
-    if (player_channelling())
-        chance2 += 10;
 
     chance2 += you.duration[DUR_VERTIGO] ? 7 : 0;
 

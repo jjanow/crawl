@@ -2349,10 +2349,10 @@ static const char* _item_ego_desc(special_armour_type ego)
         return "it causes witnesses of the wearer's kills to go into a frenzy,"
                " attacking everything nearby with great strength and speed.";
     case SPARM_GUILE:
-        return "it weakens the willpower of the wielder and everyone they hex.";
+        return "it weakens the willpower of those the wielder tries to hex.";
     case SPARM_ENERGY:
-        return "it may return the magic spent to cast spells, but lowers their "
-               "success rate. It always returns the magic spent on miscasts.";
+        return "it may return the magic spent to cast spells. It always returns "
+               "the magic spent on miscasts.";
     default:
         return "it makes the wearer crave the taste of eggplant.";
     }
