@@ -15,6 +15,7 @@
 #include "fight.h"
 #include "fprop.h"
 #include "god-conduct.h"
+#include "god-passive.h"
 #include "item-prop.h"
 #include "message.h"
 #include "mon-behv.h"
@@ -159,6 +160,10 @@ bool ranged_attack::handle_phase_attempted()
 {
     attacker->attacking(defender);
     attack_occurred = true;
+
+    // Check for stab (and set stab_attempt and stab_bonus)
+    if (attacker->is_player())
+        player_stab_check();
 
     return true;
 }
@@ -816,13 +821,52 @@ bool ranged_attack::mons_attack_effects()
 
 void ranged_attack::player_stab_check()
 {
-    stab_attempt = false;
-    stab_bonus = 0;
+    // Allow stabs for all ranged weapons (bows, crossbows, slings, etc.)
+    if (attacker->is_player() && defender && defender->is_monster()
+        && using_weapon())
+    {
+        // Use the base class stab check logic, but skip the water form
+        // distance check since ranged weapons attack from a distance
+        if (you.confused() || have_passive(passive_t::no_stabbing))
+        {
+            stab_attempt = false;
+            stab_bonus = 0;
+            return;
+        }
+
+        const stab_type orig_st = find_player_stab_type(*defender->as_monster());
+        stab_type st = orig_st;
+        stab_attempt = st != STAB_NO_STAB;
+        stab_bonus = stab_bonus_denom(st);
+
+        // See if we need to roll against dexterity / stabbing.
+        if (stab_attempt && stab_bonus > 1)
+        {
+            stab_attempt = x_chance_in_y(you.skill_rdiv(wpn_skill, 1, 2)
+                                         + you.skill_rdiv(SK_STEALTH, 1, 2)
+                                         + you.dex() + 1,
+                                         100);
+        }
+
+        if (stab_attempt)
+        {
+            count_action(CACT_STAB, orig_st);
+            // Mark that a ranged stab occurred so throw.cc doesn't alert
+            // nearby monsters (ranged stabs should be as quiet as melee stabs)
+            you.props[RANGED_STAB_KEY] = true;
+        }
+    }
+    else
+    {
+        stab_attempt = false;
+        stab_bonus = 0;
+    }
 }
 
 bool ranged_attack::player_good_stab()
 {
-    return false;
+    // All ranged weapons can get good stabs like daggers and short swords
+    return using_weapon();
 }
 
 void ranged_attack::set_attack_verb(int/* damage*/)

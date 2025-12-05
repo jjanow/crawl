@@ -734,8 +734,12 @@ void throw_it(quiver::action &a)
     }
 
     // ...any monster nearby can see that something has been thrown, even
-    // if it didn't make any noise.
-    alert_nearby_monsters();
+    // if it didn't make any noise. However, if the attack was a successful
+    // stab, keep it quiet like a melee stab would be.
+    if (you.props.exists(RANGED_STAB_KEY))
+        you.props.erase(RANGED_STAB_KEY);
+    else
+        alert_nearby_monsters();
 
     you.turn_is_over = true;
     if (aimed_at_foe && launcher && you.has_mutation(MUT_WARMUP_STRIKES))

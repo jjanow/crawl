@@ -10,6 +10,10 @@
 #include "enum.h"
 #include "quiver.h"
 
+// Property key to track if the last ranged attack was a successful stab
+// Used to suppress alert_nearby_monsters() for stealthy ranged attacks
+#define RANGED_STAB_KEY "ranged_stab_success"
+
 // TODO: this whole thing is a mess
 enum fire_type
 {
