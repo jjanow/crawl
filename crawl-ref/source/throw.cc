@@ -559,28 +559,34 @@ static void _throw_noise(actor* act, const item_def &ammo)
         return; // moooom, players are tossing their weapons again
 
     const char* msg   = nullptr;
-    int noise = 5;
+    int noise = 0;
 
     // XXX: move both messages into item-prop.cc?
+    // Bows, crossbows, and slings are quiet weapons, similar to short blades.
+    // Only hand cannons make significant noise when fired.
     switch (launcher->sub_type)
     {
     case WPN_SLING:
         msg   = "You hear a sling whirr.";
+        noise = 1;
         break;
     case WPN_SHORTBOW:
     case WPN_ORCBOW:
     case WPN_LONGBOW:
         msg   = "You hear a bow twang.";
+        noise = 1;
         break;
     case WPN_ARBALEST:
         msg   = "You hear a crossbow thunk.";
+        noise = 1;
         break;
     case WPN_TRIPLE_CROSSBOW:
         msg   = "You hear a triple crossbow go thunk-thunk-thunk.";
+        noise = 1;
         break;
     case WPN_HAND_CANNON:
-        noise *= 2;
         msg = "You hear a hand cannon's boom.";
+        noise = 10;
         break;
 
     default:
