@@ -520,6 +520,7 @@ unsigned int item_value(item_def item, bool ident)
             case SCR_TORMENT:
             case SCR_SILENCE:
             case SCR_BRAND_WEAPON:
+            case SCR_BRAND_ARMOUR:
             case SCR_BLINKING:
             case SCR_BUTTERFLIES:
                 valued += 95;

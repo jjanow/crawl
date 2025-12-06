@@ -472,6 +472,7 @@ enum scroll_type
 #endif
     SCR_POISON,
     SCR_BUTTERFLIES,
+    SCR_BRAND_ARMOUR,
     NUM_SCROLLS
 };
 

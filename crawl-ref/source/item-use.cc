@@ -2298,6 +2298,292 @@ static bool _handle_brand_weapon(bool alreadyknown, const string &pre_msg)
     return true;
 }
 
+static special_armour_type _random_armour_ego(const item_def& arm)
+{
+    equipment_slot slot = get_armour_slot(arm);
+
+    // Different brands available depending on armour slot
+    switch (slot)
+    {
+    case SLOT_BODY_ARMOUR:
+        return random_choose_weighted(
+            3, SPARM_FIRE_RESISTANCE,
+            3, SPARM_COLD_RESISTANCE,
+            2, SPARM_POISON_RESISTANCE,
+            2, SPARM_WILLPOWER,
+            1, SPARM_POSITIVE_ENERGY,
+            1, SPARM_PONDEROUSNESS);
+
+    case SLOT_CLOAK:
+        return random_choose_weighted(
+            1, SPARM_POISON_RESISTANCE,
+            1, SPARM_WILLPOWER,
+            1, SPARM_STEALTH,
+            1, SPARM_PRESERVATION);
+
+    case SLOT_HELMET:
+        return random_choose_weighted(
+            2, SPARM_SEE_INVISIBLE,
+            2, SPARM_INTELLIGENCE,
+            1, SPARM_STEALTH,
+            1, SPARM_WILLPOWER);
+
+    case SLOT_GLOVES:
+        return random_choose_weighted(
+            1, SPARM_DEXTERITY,
+            1, SPARM_STRENGTH,
+            1, SPARM_HURLING,
+            1, SPARM_STEALTH,
+            1, SPARM_INFUSION);
+
+    case SLOT_BOOTS:
+    case SLOT_BARDING:
+        return random_choose_weighted(
+            1, SPARM_FLYING,
+            1, SPARM_STEALTH,
+            1, SPARM_RAMPAGING);
+
+    case SLOT_OFFHAND:
+        // Shields
+        if (arm.sub_type == ARM_ORB)
+        {
+            return random_choose(
+                SPARM_LIGHT,
+                SPARM_RAGE,
+                SPARM_MAYHEM,
+                SPARM_GUILE,
+                SPARM_ENERGY);
+        }
+        else
+        {
+            return random_choose_weighted(
+                1, SPARM_RESISTANCE,
+                3, SPARM_FIRE_RESISTANCE,
+                3, SPARM_COLD_RESISTANCE,
+                3, SPARM_POISON_RESISTANCE,
+                3, SPARM_POSITIVE_ENERGY,
+                6, SPARM_REFLECTION,
+                12, SPARM_PROTECTION);
+        }
+
+    default:
+        return SPARM_NORMAL;
+    }
+}
+
+static void _rebrand_armour(item_def& arm)
+{
+    const special_armour_type old_ego = get_armour_ego_type(arm);
+    special_armour_type new_ego = old_ego;
+
+    // Find an appropriate brand
+    while (old_ego == new_ego)
+        new_ego = _random_armour_ego(arm);
+
+    set_item_ego_type(arm, OBJ_ARMOUR, new_ego);
+}
+
+static void _brand_armour(item_def &arm)
+{
+    const string itname = _item_name(arm);
+
+    _rebrand_armour(arm);
+
+    bool success = true;
+    colour_t flash_colour = BLACK;
+
+    switch (get_armour_ego_type(arm))
+    {
+    case SPARM_FIRE_RESISTANCE:
+        flash_colour = RED;
+        mprf("%s glows red for a moment.", itname.c_str());
+        break;
+
+    case SPARM_COLD_RESISTANCE:
+        flash_colour = LIGHTCYAN;
+        mprf("%s glows icy blue for a moment.", itname.c_str());
+        break;
+
+    case SPARM_POISON_RESISTANCE:
+        flash_colour = GREEN;
+        mprf("%s glows sickly green for a moment.", itname.c_str());
+        break;
+
+    case SPARM_SEE_INVISIBLE:
+        flash_colour = MAGENTA;
+        mprf("%s shimmers for a moment.", itname.c_str());
+        break;
+
+    case SPARM_INVISIBILITY:
+        flash_colour = DARKGREY;
+        mprf("%s fades into transparency!", itname.c_str());
+        break;
+
+    case SPARM_STRENGTH:
+        flash_colour = BROWN;
+        mprf("%s feels heavier.", itname.c_str());
+        break;
+
+    case SPARM_DEXTERITY:
+        flash_colour = CYAN;
+        mprf("%s becomes more supple.", itname.c_str());
+        break;
+
+    case SPARM_INTELLIGENCE:
+        flash_colour = LIGHTBLUE;
+        mprf("%s glows with arcane power!", itname.c_str());
+        break;
+
+    case SPARM_PONDEROUSNESS:
+        flash_colour = BROWN;
+        mprf("%s becomes incredibly heavy!", itname.c_str());
+        break;
+
+    case SPARM_FLYING:
+        flash_colour = WHITE;
+        mprf("%s feels lighter than air!", itname.c_str());
+        break;
+
+    case SPARM_WILLPOWER:
+        flash_colour = LIGHTMAGENTA;
+        mprf("%s glows with inner resolve!", itname.c_str());
+        break;
+
+    case SPARM_PROTECTION:
+        flash_colour = YELLOW;
+        mprf("%s projects an invisible shield of force!", itname.c_str());
+        break;
+
+    case SPARM_STEALTH:
+        flash_colour = DARKGREY;
+        mprf("%s becomes eerily quiet.", itname.c_str());
+        break;
+
+    case SPARM_RESISTANCE:
+        flash_colour = LIGHTRED;
+        mprf("%s shimmers with elemental resistance!", itname.c_str());
+        break;
+
+    case SPARM_POSITIVE_ENERGY:
+        flash_colour = LIGHTGREY;
+        mprf("%s glows with positive energy!", itname.c_str());
+        break;
+
+    case SPARM_PRESERVATION:
+        flash_colour = YELLOW;
+        mprf("%s becomes resistant to damage.", itname.c_str());
+        break;
+
+    case SPARM_REFLECTION:
+        flash_colour = WHITE;
+        mprf("%s shines brightly for a moment!", itname.c_str());
+        break;
+
+    case SPARM_HURLING:
+        flash_colour = LIGHTGREEN;
+        mprf("%s pulses with throwing power!", itname.c_str());
+        break;
+
+    case SPARM_REPULSION:
+        flash_colour = LIGHTBLUE;
+        mprf("%s crackles with repulsive energy!", itname.c_str());
+        break;
+
+    case SPARM_HARM:
+        flash_colour = RED;
+        mprf("%s glows with a sinister aura!", itname.c_str());
+        break;
+
+    case SPARM_SHADOWS:
+        flash_colour = DARKGREY;
+        mprf("%s becomes wreathed in shadows!", itname.c_str());
+        break;
+
+    case SPARM_RAMPAGING:
+        flash_colour = LIGHTCYAN;
+        mprf("%s surges with speed!", itname.c_str());
+        break;
+
+    case SPARM_INFUSION:
+        flash_colour = LIGHTMAGENTA;
+        mprf("%s glows with magical infusion!", itname.c_str());
+        break;
+
+    case SPARM_LIGHT:
+        flash_colour = WHITE;
+        mprf("%s blazes with brilliant light!", itname.c_str());
+        break;
+
+    case SPARM_RAGE:
+        flash_colour = RED;
+        mprf("%s seethes with fury!", itname.c_str());
+        break;
+
+    case SPARM_MAYHEM:
+        flash_colour = LIGHTRED;
+        mprf("%s crackles with chaotic energy!", itname.c_str());
+        break;
+
+    case SPARM_GUILE:
+        flash_colour = LIGHTMAGENTA;
+        mprf("%s shimmers with cunning magic!", itname.c_str());
+        break;
+
+    case SPARM_ENERGY:
+        flash_colour = LIGHTCYAN;
+        mprf("%s hums with magical energy!", itname.c_str());
+        break;
+
+    default:
+        success = false;
+        break;
+    }
+
+    if (success)
+    {
+        item_set_appearance(arm);
+        mprf_nocap("%s", arm.name(DESC_INVENTORY_EQUIP).c_str());
+        you.redraw_armour_class = true;
+        you.redraw_evasion = true;
+        flash_view_delay(UA_PLAYER, flash_colour, 300);
+    }
+    return;
+}
+
+// Returns true if the scroll is used up.
+static bool _handle_brand_armour(bool alreadyknown, const string &pre_msg)
+{
+    item_def* armour = nullptr;
+    string letter = "";
+    if (!clua.callfn("c_choose_brand_armour", ">s", &letter))
+    {
+        if (!clua.error.empty())
+            mprf(MSGCH_ERROR, "Lua error: %s", clua.error.c_str());
+    }
+    else if (isalpha(letter.c_str()[0]))
+    {
+        item_def &item = you.inv[letter_to_index(letter.c_str()[0])];
+        if (item.defined() && is_brandable_armour(item, true))
+            armour = &item;
+    }
+
+    if (!armour)
+    {
+        armour = _choose_target_item_for_scroll(alreadyknown,
+            OSEL_BRANDABLE_ARMOUR, "Brand which armour?");
+    }
+
+    if (!armour)
+        return !alreadyknown;
+
+    // Okay, we may actually (attempt to) brand something.
+    if (alreadyknown)
+        mpr(pre_msg);
+
+    _brand_armour(*armour);
+    return true;
+}
+
 bool enchant_weapon(item_def &wpn, bool quiet)
 {
     bool success = false;
@@ -2526,6 +2812,7 @@ static bool _is_cancellable_scroll(scroll_type scroll)
            || scroll == SCR_ENCHANT_ARMOUR
            || scroll == SCR_AMNESIA
            || scroll == SCR_BRAND_WEAPON
+           || scroll == SCR_BRAND_ARMOUR
            || scroll == SCR_ENCHANT_WEAPON
            || scroll == SCR_ACQUIREMENT
            || scroll == SCR_POISON;
@@ -3056,6 +3343,17 @@ bool read(item_def* scroll, dist *target)
         cancel_scroll = !_handle_brand_weapon(alreadyknown, pre_succ_msg);
         break;
 
+    case SCR_BRAND_ARMOUR:
+        if (!alreadyknown)
+        {
+            mpr(pre_succ_msg);
+            mpr("It is a scroll of brand armour.");
+            // included in default force_more_message (to show it before menu)
+        }
+
+        cancel_scroll = !_handle_brand_armour(alreadyknown, pre_succ_msg);
+        break;
+
     case SCR_IDENTIFY:
         if (!alreadyknown)
         {
@@ -3158,6 +3456,7 @@ bool read(item_def* scroll, dist *target)
 
     if (!alreadyknown
         && which_scroll != SCR_BRAND_WEAPON
+        && which_scroll != SCR_BRAND_ARMOUR
         && which_scroll != SCR_ENCHANT_WEAPON
         && which_scroll != SCR_IDENTIFY
         && which_scroll != SCR_ENCHANT_ARMOUR

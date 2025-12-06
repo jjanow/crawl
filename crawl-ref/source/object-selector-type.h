@@ -12,6 +12,7 @@ enum object_selector
     OSEL_CURSED_WORN             =  -8,
     OSEL_BRANDABLE_WEAPON        =  -9,
     OSEL_ENCHANTABLE_WEAPON      = -10,
+    OSEL_BRANDABLE_ARMOUR        = -23,
     OSEL_BLESSABLE_WEAPON        = -11,
     OSEL_CURSABLE                = -12, // Items that are worn and cursable
     OSEL_UNCURSED_WORN_RINGS     = -13,

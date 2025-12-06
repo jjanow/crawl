@@ -720,6 +720,7 @@ static const char* scroll_type_name(int scrolltype)
     case SCR_FOG:                return "fog";
     case SCR_ACQUIREMENT:        return "acquirement";
     case SCR_BRAND_WEAPON:       return "brand weapon";
+    case SCR_BRAND_ARMOUR:       return "brand armour";
     case SCR_VULNERABILITY:      return "vulnerability";
     case SCR_SILENCE:            return "silence";
     case SCR_AMNESIA:            return "amnesia";
@@ -3073,8 +3074,9 @@ string cannot_read_item_reason(const item_def *item, bool temp, bool ident)
                 return "There's no point in enhancing weapons you can't use!";
             break;
         case SCR_ENCHANT_ARMOUR:
+        case SCR_BRAND_ARMOUR:
             if (you.has_mutation(MUT_NO_GRASPING))
-                return "There's no point in enchanting armour you can't use!";
+                return "There's no point in enhancing armour you can't use!";
             break;
 
         case SCR_IDENTIFY:
@@ -3142,6 +3144,9 @@ string cannot_read_item_reason(const item_def *item, bool temp, bool ident)
 
         case SCR_BRAND_WEAPON:
             return _no_items_reason(OSEL_BRANDABLE_WEAPON, true);
+
+        case SCR_BRAND_ARMOUR:
+            return _no_items_reason(OSEL_BRANDABLE_ARMOUR, true);
 
         case SCR_IDENTIFY:
             return _no_items_reason(OSEL_UNIDENT, true);

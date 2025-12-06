@@ -1898,6 +1898,26 @@ bool is_brandable_weapon(const item_def &wpn, bool allow_ranged, bool divine)
     return true;
 }
 
+bool is_brandable_armour(const item_def &arm, bool unknown)
+{
+    if (arm.base_type != OBJ_ARMOUR)
+        return false;
+
+    // Artefacts cannot be branded.
+    if (is_artefact(arm))
+        return false;
+
+    // If we don't know the ego, assume branding is possible.
+    if (unknown && !arm.is_identified())
+        return true;
+
+    // Armour with fixed egos (dragon scales, troll leather) cannot be branded.
+    if (armour_is_special(arm))
+        return false;
+
+    return true;
+}
+
 /**
  * Which skill should the lochaber axe use?
  *
@@ -2406,6 +2426,7 @@ static map<scroll_type, item_rarity_type> _scroll_rarity = {
     { SCR_SUMMONING,      RARITY_RARE },
     { SCR_SILENCE,        RARITY_RARE },
     { SCR_BRAND_WEAPON,   RARITY_RARE },
+    { SCR_BRAND_ARMOUR,   RARITY_UNCOMMON },
     { SCR_TORMENT,        RARITY_RARE },
     { SCR_ACQUIREMENT,    RARITY_VERY_RARE },
 };

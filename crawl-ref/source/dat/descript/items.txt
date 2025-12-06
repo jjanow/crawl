@@ -1381,6 +1381,20 @@ spectral, vampiric or chaos brand.
 Ranged weapons will commonly be branded with the flaming, freezing, heavy or
 draining brand, and rarely with the electrocution or chaos brand.
 %%%%
+scroll of brand armour
+
+A scroll that imbues a piece of armour with a random ego. Any existing ego
+will be replaced with a different one. Artefacts and dragon scales cannot be
+branded in this way.
+
+The ego granted depends on the type of armour being branded. Body armour may
+gain resistances or ponderousness. Cloaks may gain poison resistance, willpower,
+stealth, or preservation. Helmets may gain see invisible, intelligence, stealth,
+or willpower. Gloves may gain dexterity, strength, hurling, stealth, or
+infusion. Boots and barding may gain flying, stealth, or rampaging. Shields
+may gain protection, reflection, or elemental resistances. Orbs may gain
+light, rage, mayhem, guile, or energy.
+%%%%
 scroll of butterflies
 
 A scroll that surrounds its user with a flight of beautiful butterflies, blowing
