@@ -13,6 +13,7 @@
 #include "english.h"
 #include "env.h"
 #include "fight.h"
+#include "fineff.h"
 #include "fprop.h"
 #include "god-conduct.h"
 #include "god-passive.h"
@@ -324,6 +325,14 @@ bool ranged_attack::handle_phase_hit()
         }
 
         maybe_trigger_jinxbite();
+
+        // Trigger detonation catalyst on ranged hit
+        if (attacker->is_player()
+            && you.duration[DUR_DETONATION_CATALYST]
+            && in_bounds(defender->pos()))
+        {
+            detonation_fineff::schedule(defender->pos(), projectile);
+        }
     }
 
     if ((using_weapon() || throwing())

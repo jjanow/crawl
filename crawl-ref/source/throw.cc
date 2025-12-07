@@ -751,6 +751,10 @@ void throw_it(quiver::action &a)
     if (aimed_at_foe && launcher && you.has_mutation(MUT_WARMUP_STRIKES))
         you.rev_up(you.time_taken);
 
+    // Extend detonation catalyst duration when making ranged attacks
+    if (you.duration[DUR_DETONATION_CATALYST])
+        you.duration[DUR_DETONATION_CATALYST] += you.time_taken;
+
     if ((launcher || is_thrown)
         && will_have_passive(passive_t::shadow_attacks)
         && item.base_type == OBJ_MISSILES
