@@ -15,6 +15,7 @@
 #include "attitude-change.h"
 #include "beam.h"
 #include "bloodspatter.h"
+#include "branch.h"
 #include "cloud.h"
 #include "cluautil.h"
 #include "colour.h"
@@ -44,6 +45,7 @@
 #include "mapdef.h"
 #include "mapmark.h"
 #include "message.h"
+#include "makeitem.h"
 #include "mon-abil.h"
 #include "mon-behv.h"
 #include "mon-cast.h"
@@ -56,6 +58,7 @@
 #include "mutation.h"
 #include "nearby-danger.h"
 #include "notes.h"
+#include "place.h"
 #include "religion.h"
 #include "shout.h"
 #include "spl-damage.h"
@@ -443,6 +446,43 @@ static void _create_monster_wand(monster_type mtyp, coord_def pos, bool silent)
 
     // Don't immediately gain knowledge of the wand if we died out of sight.
     item.flags |= ISFLAG_IDENTIFIED;
+}
+
+/**
+ * Potentially drop a random consumable (scroll, potion, or wand) when a
+ * non-summoned monster dies.
+ *
+ * @param mons the monster that died
+ */
+static void _maybe_drop_consumable(const monster& mons)
+{
+    // Summoned monsters don't drop consumables.
+    if (mons.is_summoned())
+        return;
+
+    // 1% chance to drop a consumable.
+    if (!one_chance_in(100))
+        return;
+
+    // Determine the item level based on dungeon depth.
+    // For areas without a defined depth (like the Abyss), use the depth
+    // of the last level of the Depths as a fallback.
+    int item_level;
+    if (player_in_branch(BRANCH_ABYSS))
+        item_level = absdungeon_depth(BRANCH_DEPTHS, brdepth[BRANCH_DEPTHS]);
+    else
+        item_level = env.absdepth0;
+
+    // Choose randomly between scrolls, potions, and wands.
+    object_class_type item_class = random_choose(OBJ_SCROLLS, OBJ_POTIONS,
+                                                 OBJ_WANDS);
+
+    int item_index = items(false, item_class, OBJ_RANDOM, item_level);
+
+    if (item_index == NON_ITEM)
+        return;
+
+    move_item_to_grid(&item_index, mons.pos(), mons.swimming());
 }
 
 void maybe_drop_monster_organ(monster_type mon, monster_type orig,
@@ -3384,6 +3424,9 @@ item_def* monster_die(monster& mons, killer_type killer,
         // since we still need it.
         unwind_var<int> fakehp(mons.hit_points, 1);
         monster_drop_things(&mons, YOU_KILL(killer) || pet_kill);
+
+        // Non-summoned monsters have a small chance to drop consumables.
+        _maybe_drop_consumable(mons);
     }
     else
     {
