@@ -5,7 +5,7 @@ ae   := autopickup_exceptions
 
 # Items currently not affecting you or (in some cases) not usable
 menu += darkgrey:(melded)
-menu += darkgrey:(inert)
+menu += darkgrey:(inert,
 
 # Bad items
 menu += lightred:.*bad_item.*

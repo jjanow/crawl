@@ -1765,7 +1765,15 @@ string item_def::name_aux(description_level_type desc, bool terse, bool ident,
         buff << misc_type_name(item_typ);
 
         if (is_xp_evoker(*this) && !dbname && !evoker_charges(sub_type))
-            buff << " (inert)";
+        {
+            const int debt = evoker_debt(sub_type);
+            const int charge_xp = evoker_charge_xp_debt(sub_type);
+            int remaining = debt % charge_xp;
+            if (remaining == 0 && debt > 0)
+                remaining = charge_xp;
+            const int percent = (charge_xp - remaining) * 100 / charge_xp;
+            buff << " (inert, " << percent << "%)";
+        }
         else if (is_xp_evoker(*this) &&
                  !dbname && evoker_max_charges(sub_type) > 1)
         {
