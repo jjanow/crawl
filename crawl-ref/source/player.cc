@@ -3304,9 +3304,11 @@ static void _display_attack_delay(const item_def *offhand)
     // Assume that we never have a shield penalty with an offhand weapon,
     // and we only have an armour penalty with the offhand if we do with
     // the primary.
+    // Note: Ranged weapons no longer have an encumbrance penalty.
     const bool shield_penalty = you.adjusted_shield_penalty(2) > 0;
-    const bool armour_penalty = is_slowed_by_armour(weapon)
-                                && you.adjusted_body_armour_penalty(2) > 0;
+    // is_slowed_by_armour only returns true for ranged weapons, and we've
+    // removed the encumbrance penalty for ranged weapons.
+    const bool armour_penalty = false;
     string penalty_msg = "";
     if (shield_penalty || armour_penalty)
     {

@@ -362,15 +362,6 @@ random_var player::attack_delay_with(const item_def *projectile, bool rescale,
         div_rand_round(random_var(adjusted_shield_penalty(DELAY_SCALE)),
                        DELAY_SCALE);
 
-    // Slow attacks with ranged weapons, but not clumsy bashes.
-    // Don't slow throwing attacks while holding a ranged weapon.
-    // Don't slow tossing.
-    if (ranged_weapon_attack && is_slowed_by_armour(weap))
-    {
-        const int aevp = you.adjusted_body_armour_penalty(DELAY_SCALE);
-        attk_delay += div_rand_round(random_var(aevp), DELAY_SCALE);
-    }
-
     if (you.duration[DUR_FINESSE])
     {
         ASSERT(!you.duration[DUR_BERSERK]);
