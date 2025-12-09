@@ -460,8 +460,8 @@ static void _maybe_drop_consumable(const monster& mons)
     if (mons.is_summoned())
         return;
 
-    // 1% chance to drop a consumable.
-    if (!one_chance_in(100))
+    // 2% chance to drop a consumable.
+    if (!one_chance_in(50))
         return;
 
     // Determine the item level based on dungeon depth.

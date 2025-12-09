@@ -3399,7 +3399,7 @@ static string _xp_evoker_recharge_msg(const item_def &evoker, int gained, bool s
 
 void print_xp_evoker_recharge(const item_def &evoker, int gained, bool silenced)
 {
-    mprf(_xp_evoker_recharge_msg(evoker, gained, silenced).c_str(),
+    mprf(MSGCH_PLAIN, YELLOW, _xp_evoker_recharge_msg(evoker, gained, silenced).c_str(),
          evoker.name(DESC_YOUR).c_str());
 }
 

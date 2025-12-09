@@ -897,17 +897,7 @@ void monster::remove_enchantment_effect(const mon_enchant &me, bool quiet)
         break;
 
     case ENCH_BOUND:
-        // From Sigil of Binding
-        if (props.exists(BINDING_SIGIL_DURATION_KEY))
-        {
-            if (!quiet)
-                simple_monster_message(*this, " lost momentum returns!", true);
-            add_ench(mon_enchant(ENCH_SWIFT, 1, &you,
-                                 props[BINDING_SIGIL_DURATION_KEY].get_int()));
-            props.erase(BINDING_SIGIL_DURATION_KEY);
-        }
         // Fathomless Shackles doesn't need messages for removal
-
         break;
 
     case ENCH_BULLSEYE_TARGET:

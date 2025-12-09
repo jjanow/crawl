@@ -615,9 +615,6 @@ void trigger_binding_sigil(actor& actor)
         simple_monster_message(*m,
             " moves over the binding sigil and is bound in place!",
             false, MSGCH_FRIEND_SPELL);
-
-        // The enemy will gain swift for twice as long as it was bound
-        m->props[BINDING_SIGIL_DURATION_KEY] = dur * 2;
     }
 
     revert_terrain_change(actor.pos(), TERRAIN_CHANGE_BINDING_SIGIL);
