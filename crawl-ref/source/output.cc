@@ -2076,20 +2076,9 @@ int stealth_pips()
 static string _stealth_bar(int label_length, int sw)
 {
     string bar;
-    //no colouring
     bar += _determine_colour_string(0, 5);
     bar += chop_string("Stlth", label_length);
-
-    const int unadjusted_pips = stealth_pips();
-    const int bar_len = 10;
-    const int num_high_pips = unadjusted_pips % bar_len;
-    static const vector<char> pip_tiers = { ' ', '+', '*', '#', '!' };
-    const int max_tier = pip_tiers.size() - 1;
-    const int low_tier = min(unadjusted_pips / bar_len, max_tier);
-    const int high_tier = min(low_tier + 1, max_tier);
-
-    bar.append(num_high_pips, pip_tiers[high_tier]);
-    bar.append(bar_len-num_high_pips, pip_tiers[low_tier]);
+    bar += make_stringf("%d", player_stealth());
     bar += "\n";
     linebreak_string(bar, sw);
     return bar;
