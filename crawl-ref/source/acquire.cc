@@ -412,6 +412,8 @@ static int _acquirement_weapon_subtype(int & /*quantity*/, int agent)
 
         if (wskill != skill)
             continue;
+        if (item_type_removed(OBJ_WEAPONS, i))
+            continue;
         item_considered.sub_type = i;
 
         int acqweight = property(item_considered, PWPN_ACQ_WEIGHT) * 100;

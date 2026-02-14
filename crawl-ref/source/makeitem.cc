@@ -133,6 +133,8 @@ static weapon_type _determine_weapon_subtype(int item_level)
         {
             const int wpntype = random2(NUM_WEAPONS);
 
+            if (item_type_removed(OBJ_WEAPONS, wpntype))
+                continue;
             if (x_chance_in_y(weapon_rarity(wpntype), 100))
                 return static_cast<weapon_type>(wpntype);
         }
