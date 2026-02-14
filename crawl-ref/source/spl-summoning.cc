@@ -2528,8 +2528,10 @@ int summons_limit(spell_type spell, bool player)
     const summon_cap *cap = map_find(summonsdata, spell);
     if (!cap)
         return 0;
-    else
-        return player ? cap->player_cap : cap->monster_cap;
+    // Players have no summon cap; only monsters are limited.
+    if (player)
+        return 0;
+    return cap->monster_cap;
 }
 
 static bool _spell_has_variable_cap(spell_type spell)
