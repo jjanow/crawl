@@ -690,6 +690,7 @@ const char* potion_type_name(int potiontype)
     case POT_MAGIC:             return "magic";
     case POT_BERSERK_RAGE:      return "berserk rage";
     case POT_MUTATION:          return "mutation";
+    case POT_GENE_REMOVAL:      return "gene removal";
     case POT_RESISTANCE:        return "resistance";
     case POT_LIGNIFY:           return "lignification";
 
@@ -2992,6 +2993,7 @@ bool is_dangerous_item(const item_def &item, bool temp)
             if (have_passive(passive_t::cleanse_mut_potions))
                 return false;
             // intentional fallthrough
+        case POT_GENE_REMOVAL:
         case POT_LIGNIFY:
         case POT_ATTRACTION:
             return true;

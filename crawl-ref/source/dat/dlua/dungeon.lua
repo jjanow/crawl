@@ -704,6 +704,7 @@ dgn.loot_potions = [[
     w:11  potion of invisibility /
     w:11  potion of magic /
     w:11  potion of mutation /
+    w:11  potion of gene removal /
     w:8   potion of cancellation /
     w:7   potion of brilliance /
     w:7   potion of resistance /

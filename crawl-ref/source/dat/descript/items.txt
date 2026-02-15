@@ -1119,6 +1119,13 @@ A potion which mutates the drinker, removing several mutations then
 granting a few random mutations, which are likely (but not guaranteed) to be
 beneficial.
 %%%%
+potion of gene removal
+
+A potion which allows the drinker to selectively remove one of their
+acquired mutations. It presents a menu of all removable mutations (excluding
+those inherent to your species or demonic ancestry), from which you may choose
+one to remove.
+%%%%
 potion of resistance
 
 A potion which grants temporary resistance to a variety of harmful effects:

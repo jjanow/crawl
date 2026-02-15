@@ -29,6 +29,7 @@
 #include "player-stats.h"
 #include "potion-type.h"
 #include "prompt.h"
+#include "menu.h"
 #include "religion.h"
 #include "skill-menu.h"
 #include "spl-goditem.h"
@@ -859,6 +860,119 @@ public:
     }
 };
 
+class PotionGeneRemoval : public PotionEffect
+{
+private:
+    PotionGeneRemoval() : PotionEffect(POT_GENE_REMOVAL) { }
+    DISALLOW_COPY_AND_ASSIGN(PotionGeneRemoval);
+public:
+    static const PotionGeneRemoval &instance()
+    {
+        static PotionGeneRemoval inst; return inst;
+    }
+
+    bool can_quaff(string *reason = nullptr, bool temp = true) const override
+    {
+        if (!_can_mutate(reason, temp))
+            return false;
+        for (int i = 0; i < NUM_MUTATIONS; i++)
+        {
+            mutation_type mut = static_cast<mutation_type>(i);
+            if (you.get_base_mutation_level(mut, false, false, true) > 0
+                && !you.has_innate_mutation(mut)
+                && !you.has_temporary_mutation(mut))
+            {
+                return true;
+            }
+        }
+        if (reason)
+            *reason = "You have no mutations that can be removed.";
+        return false;
+    }
+
+    bool effect(bool = true, int = 40, bool = true) const override
+    {
+        // Collect removable (non-innate, non-temporary) mutations.
+        vector<mutation_type> removable;
+        for (int i = 0; i < NUM_MUTATIONS; i++)
+        {
+            mutation_type mut = static_cast<mutation_type>(i);
+            if (you.get_base_mutation_level(mut, false, false, true) > 0
+                && !you.has_innate_mutation(mut)
+                && !you.has_temporary_mutation(mut))
+            {
+                removable.push_back(mut);
+            }
+        }
+
+        if (removable.empty())
+        {
+            mpr("You have no mutations that can be removed.");
+            return false;
+        }
+
+        // Build selection menu.
+        Menu menu(MF_SINGLESELECT | MF_ALLOW_FORMATTING | MF_ARROWS_SELECT);
+        menu.set_tag("gene_removal");
+        menu.set_title(new MenuEntry("Select a mutation to remove", MEL_TITLE));
+        menu.action_cycle = Menu::CYCLE_NONE;
+        menu.menu_action = Menu::ACT_EXECUTE;
+
+        menu_letter letter;
+        for (mutation_type mut : removable)
+        {
+            const string desc = mutation_desc(mut, -1, true, false);
+            MenuEntry *me = new MenuEntry(desc, MEL_ITEM, 1, letter);
+            me->data = (void*)(intptr_t)mut;
+#ifdef USE_TILE
+            const tileidx_t tile = get_mutation_tile(mut);
+            if (tile != 0)
+                me->add_tile(tile_def(tile + you.get_mutation_level(mut, false) - 1));
+#endif
+            menu.add_entry(me);
+            ++letter;
+        }
+
+        vector<MenuEntry*> sel = menu.show();
+        if (sel.empty())
+        {
+            canned_msg(MSG_OK);
+            return false;
+        }
+
+        const mutation_type chosen = static_cast<mutation_type>(
+            (intptr_t)sel.front()->data);
+        const bool deleted = delete_mutation(chosen, "potion of gene removal",
+                                            true);
+        if (deleted)
+            learned_something_new(HINT_YOU_MUTATED);
+        return deleted;
+    }
+
+    bool quaff(bool was_known) const override
+    {
+        if (was_known && !check_known_quaff())
+            return false;
+
+        string msg = "Really drink that potion of gene removal";
+        msg += you.rmut_from_item() ? " while resistant to mutation?" : "?";
+        const bool zin_check = you_worship(GOD_ZIN);
+        if (zin_check)
+            msg += " Zin will disapprove.";
+        if (was_known && (zin_check || you.rmut_from_item())
+                      && !yesno(msg.c_str(), false, 'n'))
+        {
+            canned_msg(MSG_OK);
+            return false;
+        }
+
+        const bool success = effect();
+        if (success && zin_check)
+            did_god_conduct(DID_DELIBERATE_MUTATING, 15, was_known);
+        return success;
+    }
+};
+
 class PotionMoonshine : public PotionEffect
 {
 private:
@@ -902,6 +1016,7 @@ static const unordered_map<potion_type, const PotionEffect*, std::hash<int>> pot
     { POT_MAGIC, &PotionMagic::instance(), },
     { POT_BERSERK_RAGE, &PotionBerserk::instance(), },
     { POT_MUTATION, &PotionMutation::instance(), },
+    { POT_GENE_REMOVAL, &PotionGeneRemoval::instance(), },
     { POT_RESISTANCE, &PotionResistance::instance(), },
     { POT_LIGNIFY, &PotionLignify::instance(), },
 };

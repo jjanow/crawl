@@ -529,6 +529,8 @@ static void _decent_potion_or_scroll()
             you.has_mutation(MUT_NO_DRINK) ? 0 : 5 },
         { { OBJ_POTIONS, POT_MUTATION },
             you.is_lifeless_undead(false) ? 0 : 1 },
+        { { OBJ_POTIONS, POT_GENE_REMOVAL },
+            you.is_lifeless_undead(false) ? 0 : 1 },
     };
 
     const pair<object_class_type, int> *option

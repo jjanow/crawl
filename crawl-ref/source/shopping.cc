@@ -477,6 +477,7 @@ unsigned int item_value(item_def item, bool ident)
             case POT_HEAL_WOUNDS:
             case POT_AMBROSIA:
             case POT_MUTATION:
+            case POT_GENE_REMOVAL:
                 valued += 80;
                 break;
 

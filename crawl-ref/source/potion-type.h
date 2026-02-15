@@ -46,6 +46,7 @@ enum potion_type
     POT_CURE_MUTATION,
 #endif
     POT_MUTATION,
+    POT_GENE_REMOVAL,
     POT_RESISTANCE,
 #if TAG_MAJOR_VERSION == 34
     POT_BLOOD,
@@ -77,6 +78,7 @@ const vector<potion_type> potion_types =
     POT_MAGIC,
     POT_BERSERK_RAGE,
     POT_MUTATION,
+    POT_GENE_REMOVAL,
     POT_RESISTANCE,
     POT_LIGNIFY,
 };
