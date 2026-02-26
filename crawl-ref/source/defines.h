@@ -349,6 +349,8 @@ const char * const THUNDERBOLT_AIM_KEY     = "thunderbolt_aim";
 #define BLINKITIS_SOURCE_KEY "disjunctioner"
 #define BLINKITIS_AUX_KEY "disjunction_aux"
 #define CORROSION_KEY "corrosion_amount"
+#define ELEMENTAL_RESISTANCE_KEY "elemental_resistance"
+#define AUGMENT_AMOUNT_KEY "augment_amount"
 #define CONFUSING_TOUCH_KEY "confusing touch power"
 #define NUM_SACRIFICES_KEY "num_sacrifice_muts"
 #define FLAY_DAMAGE_KEY "flay_damage"

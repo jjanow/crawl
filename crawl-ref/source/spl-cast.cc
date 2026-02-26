@@ -2509,6 +2509,36 @@ static spret _do_cast(spell_type spell, int powc, const dist& spd,
     case SPELL_SWIFTNESS:
         return cast_swiftness(powc, fail);
 
+    case SPELL_FLY:
+        return cast_flight(powc, fail);
+
+    case SPELL_SEE_INVISIBLE:
+        return cast_see_invisible(powc, fail);
+
+    case SPELL_CURE_POISON:
+        return cast_cure_poison(powc, fail);
+
+    case SPELL_REGENERATION:
+        return cast_regeneration(powc, fail);
+
+    case SPELL_RESISTANCE:
+        return cast_resistance(powc, fail);
+
+    case SPELL_AUGMENT:
+        return cast_augment(powc, fail);
+
+    case SPELL_STONESKIN:
+        return cast_stoneskin(powc, fail);
+
+    case SPELL_NECROMUTATION:
+        return cast_necromutation(powc, fail);
+
+    case SPELL_DARKNESS:
+        return cast_darkness(powc, fail);
+
+    case SPELL_RESURRECT:
+        return cast_resurrect(powc, fail);
+
     case SPELL_OZOCUBUS_ARMOUR:
         return ice_armour(powc, fail);
 

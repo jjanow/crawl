@@ -38,6 +38,17 @@ static void _end_corrosion()
     you.wield_change = true;
 }
 
+static void _end_elemental_resistance()
+{
+    you.props[ELEMENTAL_RESISTANCE_KEY] = 0;
+}
+
+static void _end_augment()
+{
+    you.props[AUGMENT_AMOUNT_KEY] = 0;
+    you.redraw_stats.init(true);
+}
+
 static void _end_death_channel()
 {
     you.attribute[ATTR_DIVINE_DEATH_CHANNEL] = 0;
@@ -325,6 +336,18 @@ static const duration_def duration_data[] =
       "You are resistant to the elements.", D_DISPELLABLE | D_EXPIRES,
       {{ "Your resistance to elements expires." },
           { "You start to feel less resistant.", 1}}, 6},
+    { DUR_ELEMENTAL_RESISTANCE,
+      BLUE, "ElemR",
+      "elementally resistant", "elemental resistance",
+      "You are resistant to fire and cold.", D_DISPELLABLE | D_EXPIRES,
+      {{ "Your elemental resistance expires.", _end_elemental_resistance },
+          { "You start to feel less resistant.", 1}}, 6},
+    { DUR_AUGMENT,
+      LIGHTBLUE, "Aug",
+      "augmented", "augment",
+      "Your attributes are augmented.", D_DISPELLABLE | D_EXPIRES,
+      {{ "Your augmentation fades.", _end_augment },
+          { "You feel your augmentation waning.", 1}}, 6},
     { DUR_SLIMIFY, // Has custom long_text
       GREEN, "Slime",
       "slimy", "slimify",
@@ -761,6 +784,7 @@ static const duration_def duration_data[] =
     { DUR_MESMERISE_IMMUNE, 0, "", "", "mesmerisation immunity", "", D_NO_FLAGS, {{""}} },
     { DUR_HASTE, 0, "", "", "haste", "", D_DISPELLABLE, {}, 6},
     { DUR_FLIGHT, 0, "", "", "flight", "", D_DISPELLABLE /*but special-cased*/, {}, 10},
+    { DUR_SEE_INVISIBLE, 0, "", "", "see invisible", "", D_DISPELLABLE},
     { DUR_POISONING, 0, "", "", "poisoning", "", D_NEGATIVE},
     { DUR_PIETY_POOL, 0, "", "", "piety pool", "", D_NO_FLAGS},
     { DUR_TRANSFORMATION, 0, "", "", "transformation", "", D_DISPELLABLE /*but special-cased*/, {}, 10},
@@ -777,6 +801,10 @@ static const duration_def duration_data[] =
     { DUR_SICKENING, 0, "", "", "sickening", "", D_NEGATIVE, {{""}}},
     { DUR_WATER_HOLD, 0, "", "", "drowning", "", D_NEGATIVE},
     // Regeneration information handled separately.
+    { DUR_REGENERATION, 0, "", "", "regeneration", "", D_DISPELLABLE,
+      {{ "Your unnatural regeneration fades." }}},
+    { DUR_STONESKIN, 0, "", "", "stoneskin", "", D_DISPELLABLE,
+      {{ "Your skin softens." }}},
     { DUR_TROGS_HAND, 0, "", "strong-willed", "trogs hand",
       "Your willpower is greatly increased.", D_EXPIRES,
         {{"", trog_remove_trogs_hand},
@@ -830,6 +858,8 @@ static const duration_def duration_data[] =
     { DUR_RIME_YAK_AURA, 0, "", "", "cold aura", "", D_NO_FLAGS, {{""}}},
     { DUR_AUTODODGE, 0, "", "", "autododge", "", D_NO_FLAGS},
     { DUR_DAZED, 0, "", "", "dazed", "", D_NEGATIVE},
+    { DUR_DARKNESS, 0, "", "", "darkness", "", D_DISPELLABLE,
+      {{ "The darkness around you dissipates.", update_vision_range }}},
 
 #if TAG_MAJOR_VERSION == 34
     // And removed ones
@@ -838,7 +868,6 @@ static const duration_def duration_data[] =
     { DUR_DEFLECT_MISSILES, 0, "", "", "old deflect missiles", "", D_NO_FLAGS},
     { DUR_JELLY_PRAYER, 0, "", "", "old jelly prayer", "", D_NO_FLAGS},
     { DUR_CONTROLLED_FLIGHT, 0, "", "", "old controlled flight", "", D_NO_FLAGS},
-    { DUR_SEE_INVISIBLE, 0, "", "", "old see invisible", "", D_NO_FLAGS},
     { DUR_INSULATION, 0, "", "", "old insulation", "", D_NO_FLAGS},
     { DUR_BARGAIN, 0, "", "", "old bargain", "", D_NO_FLAGS},
     { DUR_SLAYING, 0, "", "", "old slaying", "", D_NO_FLAGS},
@@ -862,13 +891,11 @@ static const duration_def duration_data[] =
     { DUR_MAGIC_SHIELD, 0, "", "", "old magic shield", "", D_NO_FLAGS},
     { DUR_FORTITUDE, 0, "", "", "old fortitude", "", D_NO_FLAGS},
     { DUR_WATER_HOLD_IMMUNITY, 0, "", "", "old drowning immunity", "", D_NO_FLAGS, {{""}}},
-    { DUR_REGENERATION, 0, "", "", "old regeneration", "", D_NO_FLAGS},
     { DUR_GOURMAND, 0, "", "", "old gourmand", "", D_NO_FLAGS},
     { DUR_ABJURATION_AURA, 0, "", "", "old abjuration", "", D_NO_FLAGS},
     { DUR_INFUSION, 0, "", "", "old infusion", "", D_NO_FLAGS},
     { DUR_SHROUD_OF_GOLUBRIA, 0, "", "", "old shroud", "", D_NO_FLAGS},
     { DUR_FIRE_SHIELD, 0, "", "", "old ring of flames", "", D_NO_FLAGS},
-    { DUR_DARKNESS, 0, "", "", "old darkness", "", D_NO_FLAGS},
     { DUR_STABBING, 0, "", "", "old stabbing", "", D_NO_FLAGS},
     { DUR_SCRYING, 0, "", "", "old scrying", "", D_NO_FLAGS},
     { DUR_ELIXIR_MAGIC, 0, "", "", "old elixir magic", "", D_NO_FLAGS},

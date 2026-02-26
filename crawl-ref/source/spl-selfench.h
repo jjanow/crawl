@@ -22,6 +22,16 @@ spret corpse_armour(int pow, bool fail);
 spret cast_revivification(int pow, bool fail);
 
 spret cast_swiftness(int power, bool fail);
+spret cast_augment(int power, bool fail);
+spret cast_flight(int power, bool fail);
+spret cast_resistance(int power, bool fail);
+spret cast_see_invisible(int power, bool fail);
+spret cast_cure_poison(int power, bool fail);
+spret cast_regeneration(int power, bool fail);
+spret cast_stoneskin(int power, bool fail);
+spret cast_necromutation(int power, bool fail);
+spret cast_darkness(int power, bool fail);
+spret cast_resurrect(int power, bool fail);
 
 int cast_selective_amnesia(const string &pre_msg = "");
 

@@ -2,6 +2,7 @@
 
 #include "player-stats.h"
 
+#include "defines.h"
 #include "artefact.h"
 #include "clua.h"
 #include "delay.h"
@@ -308,6 +309,10 @@ static int _strength_modifier(bool innate_only)
 
         // form
         result += get_form()->str_mod;
+
+        // Augment spell
+        if (you.duration[DUR_AUGMENT] && you.props.exists(AUGMENT_AMOUNT_KEY))
+            result += you.props[AUGMENT_AMOUNT_KEY].get_int();
     }
 
     // mutations
@@ -335,6 +340,10 @@ static int _int_modifier(bool innate_only)
 
         // randarts of intelligence
         result += you.scan_artefacts(ARTP_INTELLIGENCE);
+
+        // Augment spell
+        if (you.duration[DUR_AUGMENT] && you.props.exists(AUGMENT_AMOUNT_KEY))
+            result += you.props[AUGMENT_AMOUNT_KEY].get_int();
     }
 
     // mutations
@@ -365,6 +374,10 @@ static int _dex_modifier(bool innate_only)
 
         // form
         result += get_form()->dex_mod;
+
+        // Augment spell
+        if (you.duration[DUR_AUGMENT] && you.props.exists(AUGMENT_AMOUNT_KEY))
+            result += you.props[AUGMENT_AMOUNT_KEY].get_int();
     }
 
     // mutations

@@ -71,6 +71,7 @@ static const vector<spell_type> spellbook_templates[] =
 {   // Book of Fire
     SPELL_FOXFIRE,
     SPELL_PLASMA_BEAM,
+    SPELL_RESISTANCE,
     SPELL_STARBURST,
 },
 
@@ -78,6 +79,7 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_FREEZING_CLOUD,
     SPELL_OZOCUBUS_REFRIGERATION,
     SPELL_POLAR_VORTEX,
+    SPELL_RESISTANCE,
 },
 
 {   // Book of Spatial Translocations
@@ -89,11 +91,14 @@ static const vector<spell_type> spellbook_templates[] =
 {   // Book of Hexes
     SPELL_ANGUISH,
     SPELL_CAUSE_FEAR,
+    SPELL_DARKNESS,
+    SPELL_SEE_INVISIBLE,
     SPELL_ENFEEBLE,
 },
 
 {   // Young Poisoner's Handbook
     SPELL_POISONOUS_VAPOURS,
+    SPELL_CURE_POISON,
     SPELL_MERCURY_ARROW,
     SPELL_OLGREBS_TOXIC_RADIANCE,
 },
@@ -106,6 +111,8 @@ static const vector<spell_type> spellbook_templates[] =
 
 {   // Book of Death
     SPELL_ANIMATE_DEAD,
+    SPELL_REGENERATION,
+    SPELL_RESURRECT,
     SPELL_HAUNT,
     SPELL_INFESTATION,
 },
@@ -164,6 +171,7 @@ static const vector<spell_type> spellbook_templates[] =
 
 {   // Book of Air
     SPELL_SHOCK,
+    SPELL_FLY,
     SPELL_SWIFTNESS,
     SPELL_AIRSTRIKE,
 },
@@ -211,6 +219,7 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_SANDBLAST,
     SPELL_STONE_ARROW,
     SPELL_PASSWALL,
+    SPELL_STONESKIN,
 },
 
 #if TAG_MAJOR_VERSION == 34
@@ -277,6 +286,7 @@ static const vector<spell_type> spellbook_templates[] =
 },
 
 {   // Book of Transmutation
+    SPELL_AUGMENT,
     SPELL_PETRIFY,
     SPELL_IRRADIATE,
     SPELL_FULSOME_FUSILLADE,
@@ -303,6 +313,7 @@ static const vector<spell_type> spellbook_templates[] =
 {   // Necronomicon
     SPELL_HAUNT,
     SPELL_BORGNJORS_REVIVIFICATION,
+    SPELL_NECROMUTATION,
     SPELL_DEATHS_DOOR,
 },
 

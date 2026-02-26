@@ -24,12 +24,15 @@
 #include "prompt.h"
 #include "religion.h"
 #include "spl-other.h"
+#include "spl-summoning.h"
 #include "spl-util.h"
 #include "stringutil.h"
 #include "terrain.h"
 #include "transform.h"
 #include "tilepick.h"
 #include "view.h"
+
+static const char STONESKIN_AC_KEY[] = "stoneskin_ac";
 
 spret cast_deaths_door(int pow, bool fail)
 {
@@ -319,4 +322,128 @@ spret cast_detonation_catalyst(bool fail)
     you.set_duration(DUR_DETONATION_CATALYST, random_range(3,5));
 
     return spret::success;
+}
+
+spret cast_resistance(int power, bool fail)
+{
+    fail_check();
+
+    const int fire_skill = you.skill(SK_FIRE_MAGIC, 1);
+    const int ice_skill = you.skill(SK_ICE_MAGIC, 1);
+    const int total_skill = fire_skill + ice_skill;
+
+    // Resistance strength: 1 at 0 skill, up to 3 at 30+ total skill
+    const int strength = min(3, 1 + total_skill / 10);
+    // Duration: 15 + skill contribution + power, reasonably long
+    const int dur = 15 + total_skill / 2 + random2avg(power, 2);
+
+    if (you.duration[DUR_ELEMENTAL_RESISTANCE])
+        mpr("Your elemental resistance intensifies.");
+    else
+        mpr("You feel resistant to fire and cold.");
+
+    const int old_strength = you.props.exists(ELEMENTAL_RESISTANCE_KEY)
+                             ? you.props[ELEMENTAL_RESISTANCE_KEY].get_int() : 0;
+    you.props[ELEMENTAL_RESISTANCE_KEY] = max(old_strength, strength);
+    if (you.duration[DUR_ELEMENTAL_RESISTANCE])
+        you.increase_duration(DUR_ELEMENTAL_RESISTANCE, dur, 80);
+    else
+        you.set_duration(DUR_ELEMENTAL_RESISTANCE, dur, 80,
+                         "You feel resistant to fire and cold.");
+    return spret::success;
+}
+
+spret cast_augment(int power, bool fail)
+{
+    fail_check();
+
+    // Stat bonus: scales from 1 to 15 based on power (cap 200)
+    const int bonus = min(15, 1 + div_rand_round(power * 14, 200));
+    // Duration: variable, reasonably long - 25 to 50+ turns
+    const int dur = 25 + random2avg(power, 2) + div_rand_round(power, 15);
+
+    if (you.duration[DUR_AUGMENT])
+        mpr("Your augmentation strengthens.");
+    else
+        mpr("You feel your attributes surge.");
+
+    // Stack by taking the higher bonus
+    const int old_bonus = you.props.exists(AUGMENT_AMOUNT_KEY)
+                          ? you.props[AUGMENT_AMOUNT_KEY].get_int() : 0;
+    you.props[AUGMENT_AMOUNT_KEY] = max(old_bonus, bonus);
+    you.increase_duration(DUR_AUGMENT, dur, 120);
+    you.redraw_stats.init(true);
+    return spret::success;
+}
+
+spret cast_flight(int power, bool fail)
+{
+    fail_check();
+    fly_player(power, you.duration[DUR_FLIGHT] > 0);
+    return spret::success;
+}
+
+spret cast_see_invisible(int power, bool fail)
+{
+    fail_check();
+    you.set_duration(DUR_SEE_INVISIBLE, 15 + random2avg(power, 2), 80,
+                     "You can see invisible things.");
+    return spret::success;
+}
+
+spret cast_cure_poison(int, bool fail)
+{
+    fail_check();
+    const int old_poison = get_player_poisoning();
+    reduce_player_poison(100000);
+    if (old_poison <= 0)
+        mpr("You feel momentarily purged.");
+    return spret::success;
+}
+
+spret cast_regeneration(int power, bool fail)
+{
+    fail_check();
+    if (you.duration[DUR_REGENERATION])
+        mpr("Your regeneration intensifies.");
+    else
+        mpr("Your flesh knits with unnatural speed.");
+    you.set_duration(DUR_REGENERATION, 12 + random2avg(power, 2), 100);
+    return spret::success;
+}
+
+spret cast_stoneskin(int power, bool fail)
+{
+    fail_check();
+    const int bonus = 2 + div_rand_round(power, 20);
+    if (you.duration[DUR_STONESKIN])
+        mpr("Your skin hardens further.");
+    else
+        mpr("Your skin hardens to stone.");
+    you.props[STONESKIN_AC_KEY] = max(you.props[STONESKIN_AC_KEY].get_int(), bonus);
+    you.set_duration(DUR_STONESKIN, 12 + random2avg(power, 2), 100);
+    you.redraw_armour_class = true;
+    return spret::success;
+}
+
+spret cast_necromutation(int power, bool fail)
+{
+    fail_check();
+    if (transform(10 + div_rand_round(power, 4), transformation::death))
+        return spret::success;
+    return spret::abort;
+}
+
+spret cast_darkness(int power, bool fail)
+{
+    fail_check();
+    you.set_duration(DUR_DARKNESS, 10 + random2avg(power, 2), 80,
+                     "Shadows gather around you.");
+    update_vision_range();
+    return spret::success;
+}
+
+spret cast_resurrect(int power, bool fail)
+{
+    return cast_animate_dead(power, fail);
 }

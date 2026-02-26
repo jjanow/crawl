@@ -13,6 +13,7 @@ enum duration_type
     DUR_MIGHT,
     DUR_BRILLIANCE,
     DUR_AGILITY,
+    DUR_AUGMENT,
     DUR_FLIGHT,
     DUR_BERSERK,
     DUR_POISONING,
@@ -40,9 +41,8 @@ enum duration_type
     DUR_DIVINE_VIGOUR,          // duration of Ely's Divine Vigour
     DUR_DIVINE_STAMINA,         // duration of Zin's Divine Stamina
     DUR_DIVINE_SHIELD,          // remaining charges of TSO's Divine Shield
-#if TAG_MAJOR_VERSION == 34
     DUR_REGENERATION,
-#endif
+    DUR_STONESKIN,
     DUR_SWIFTNESS,
 #if TAG_MAJOR_VERSION == 34
     DUR_CONTROLLED_FLIGHT,
@@ -57,9 +57,9 @@ enum duration_type
 #if TAG_MAJOR_VERSION == 34
     DUR_DEFLECT_MISSILES,
     DUR_PHASE_SHIFT,
-    DUR_SEE_INVISIBLE,
     DUR_EXCRUCIATING_WOUNDS,
 #endif
+    DUR_SEE_INVISIBLE,
     DUR_DEMONIC_GUARDIAN,       // demonic guardian timeout
     DUR_POWERED_BY_DEATH,
     DUR_SILENCE,
@@ -71,6 +71,7 @@ enum duration_type
     DUR_INSULATION,
 #endif
     DUR_RESISTANCE,
+    DUR_ELEMENTAL_RESISTANCE,
 #if TAG_MAJOR_VERSION == 34
     DUR_SLAYING,
 #endif
@@ -107,9 +108,7 @@ enum duration_type
     DUR_LIFESAVING,
 #endif
     DUR_STUN_IMMUNITY,
-#if TAG_MAJOR_VERSION == 34
     DUR_DARKNESS,
-#endif
     DUR_PETRIFYING,
 #if TAG_MAJOR_VERSION == 34
     DUR_SHROUD_OF_GOLUBRIA,

@@ -1144,6 +1144,14 @@ static void _describe_regen(status_info& inf)
         inf.long_text  = "You are regenerating.";
         _mark_expiring(inf, dur_expiring(DUR_TROGS_HAND));
     }
+    else if (you.duration[DUR_REGENERATION])
+    {
+        inf.light_colour = _dur_colour(BLUE, dur_expiring(DUR_REGENERATION));
+        inf.light_text = "Regen";
+        inf.short_text = "regenerating";
+        inf.long_text  = "You are regenerating.";
+        _mark_expiring(inf, dur_expiring(DUR_REGENERATION));
+    }
     else if (regeneration_is_inhibited())
     {
         inf.light_colour = RED;

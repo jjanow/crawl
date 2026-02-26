@@ -98,6 +98,8 @@
 #include "xom.h"
 #include "zot.h" // bezotting_level
 
+static const char STONESKIN_AC_KEY[] = "stoneskin_ac";
+
 static void _pruneify()
 {
     if (!you.may_pruneify())
@@ -810,6 +812,9 @@ void update_vision_range()
     if (you.unrand_equipped(UNRAND_NIGHT))
         you.current_vision = you.current_vision * 3 / 4;
 
+    if (you.duration[DUR_DARKNESS])
+        you.current_vision = max(0, you.current_vision - 2);
+
     if (you.duration[DUR_PRIMORDIAL_NIGHTFALL])
     {
         // Determine the percentage of Nightfall's max duration that has passed,
@@ -1074,6 +1079,8 @@ static int _player_bonus_regen()
     rr += you.get_mutation_level(MUT_REGENERATION) * REGEN_PIP;
 
     rr += get_form()->regen_bonus();
+    if (you.duration[DUR_REGENERATION])
+        rr += 2 * REGEN_PIP;
 
     // Powered By Death mutation, boosts regen by variable strength
     // if the duration of the effect is still active.
@@ -1275,6 +1282,12 @@ int player_res_fire(bool allow_random, bool temp, bool items)
         if (you.duration[DUR_RESISTANCE])
             rf++;
 
+        if (you.duration[DUR_ELEMENTAL_RESISTANCE]
+            && you.props.exists(ELEMENTAL_RESISTANCE_KEY))
+        {
+            rf += you.props[ELEMENTAL_RESISTANCE_KEY].get_int();
+        }
+
         if (you.duration[DUR_QAZLAL_FIRE_RES])
             rf++;
     }
@@ -1328,6 +1341,12 @@ int player_res_cold(bool allow_random, bool temp, bool items)
     {
         if (you.duration[DUR_RESISTANCE])
             rc++;
+
+        if (you.duration[DUR_ELEMENTAL_RESISTANCE]
+            && you.props.exists(ELEMENTAL_RESISTANCE_KEY))
+        {
+            rc += you.props[ELEMENTAL_RESISTANCE_KEY].get_int();
+        }
 
         if (you.duration[DUR_QAZLAL_COLD_RES])
             rc++;
@@ -6304,6 +6323,8 @@ int player::armour_class_scaled(int scale) const
         AC += max(0, 500 + you.props[ICY_ARMOUR_KEY].get_int() * 8
                      - unadjusted_body_armour_penalty() * 50);
     }
+    if (duration[DUR_STONESKIN] && you.props.exists(STONESKIN_AC_KEY))
+        AC += 100 * you.props[STONESKIN_AC_KEY].get_int();
 
     if (has_mutation(MUT_ICEMAIL))
         AC += 100 * player_icemail_armour_class();
@@ -7532,6 +7553,7 @@ bool player::can_see_invisible() const
         || wearing_ego(OBJ_ARMOUR, SPARM_SEE_INVISIBLE)
         // randart gear
         || scan_artefacts(ARTP_SEE_INVISIBLE) > 0
+        || you.duration[DUR_SEE_INVISIBLE]
         || you.duration[DUR_REVELATION])
     {
         return true;

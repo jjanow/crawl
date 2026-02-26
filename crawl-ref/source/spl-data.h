@@ -71,6 +71,17 @@ static const struct spell_desc spelldata[] =
 },
 
 {
+    SPELL_AUGMENT, "Augment",
+    spschool::alchemy,
+    spflag::selfench | spflag::utility,
+    3,
+    100,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
+
+{
     SPELL_BLASTMOTE, "Volatile Blastmotes",
     spschool::fire | spschool::translocation,
     spflag::destructive,
@@ -4620,8 +4631,26 @@ AXED_SPELL(SPELL_CONTROL_TELEPORT, "Control Teleport")
 AXED_SPELL(SPELL_CONTROL_UNDEAD, "Control Undead")
 AXED_SPELL(SPELL_CONTROL_WINDS, "Control Winds")
 AXED_SPELL(SPELL_CORRUPT_BODY, "Corrupt Body")
-AXED_SPELL(SPELL_CURE_POISON, "Cure Poison")
-AXED_SPELL(SPELL_DARKNESS, "Darkness")
+{
+    SPELL_CURE_POISON, "Cure Poison",
+    spschool::necromancy,
+    spflag::selfench | spflag::utility,
+    3,
+    100,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
+{
+    SPELL_DARKNESS, "Darkness",
+    spschool::hexes,
+    spflag::selfench | spflag::utility,
+    6,
+    100,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
 AXED_SPELL(SPELL_DEFLECT_MISSILES, "Deflect Missiles")
 AXED_SPELL(SPELL_DELAYED_FIREBALL, "Delayed Fireball")
 AXED_SPELL(SPELL_DEMONIC_HORDE, "Demonic Horde")
@@ -4631,7 +4660,16 @@ AXED_SPELL(SPELL_EVAPORATE, "Evaporate")
 AXED_SPELL(SPELL_EXPLOSIVE_BOLT, "Explosive Bolt")
 AXED_SPELL(SPELL_FAKE_RAKSHASA_SUMMON, "Rakshasa Summon")
 AXED_SPELL(SPELL_FIRE_BRAND, "Fire Brand")
-AXED_SPELL(SPELL_FLY, "Flight")
+{
+    SPELL_FLY, "Flight",
+    spschool::air,
+    spflag::selfench | spflag::utility,
+    3,
+    100,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
 AXED_SPELL(SPELL_FORCEFUL_DISMISSAL, "Forceful Dismissal")
 AXED_SPELL(SPELL_FREEZING_AURA, "Freezing Aura")
 AXED_SPELL(SPELL_FRENZY, "Frenzy")
@@ -4652,16 +4690,53 @@ AXED_SPELL(SPELL_POISON_WEAPON, "Poison Weapon")
 AXED_SPELL(SPELL_RANDOM_BOLT, "Random Bolt")
 AXED_SPELL(SPELL_REARRANGE_PIECES, "Rearrange the Pieces")
 AXED_SPELL(SPELL_RECALL, "Recall")
-AXED_SPELL(SPELL_REGENERATION, "Regeneration")
+{
+    SPELL_REGENERATION, "Regeneration",
+    spschool::necromancy,
+    spflag::selfench | spflag::utility,
+    3,
+    100,
+    -1, -1,
+    0,
+    TILEG_REGENERATION,
+},
+{
+    SPELL_RESISTANCE, "Resistance",
+    spschool::fire | spschool::ice,
+    spflag::selfench | spflag::utility,
+    3,
+    100,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
 AXED_SPELL(SPELL_RING_OF_FLAMES, "Ring of Flames")
-AXED_SPELL(SPELL_SEE_INVISIBLE, "See Invisible")
+{
+    SPELL_SEE_INVISIBLE, "See Invisible",
+    spschool::hexes,
+    spflag::selfench | spflag::utility,
+    4,
+    100,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
 AXED_SPELL(SPELL_SHAFT_SELF, "Shaft Self")
 AXED_SPELL(SPELL_SHROUD_OF_GOLUBRIA, "Shroud of Golubria")
 AXED_SPELL(SPELL_SILVER_BLAST, "Silver Blast")
 AXED_SPELL(SPELL_SINGULARITY, "Singularity")
 AXED_SPELL(SPELL_SONG_OF_SHIELDING, "Song of Shielding")
 AXED_SPELL(SPELL_SPECTRAL_WEAPON, "Spectral Weapon")
-AXED_SPELL(SPELL_STONESKIN, "Stoneskin")
+{
+    SPELL_STONESKIN, "Stoneskin",
+    spschool::earth,
+    spflag::selfench | spflag::utility,
+    3,
+    100,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
 AXED_SPELL(SPELL_SUMMON_BUTTERFLIES, "Summon Butterflies")
 AXED_SPELL(SPELL_SUMMON_ELEMENTAL, "Summon Elemental")
 AXED_SPELL(SPELL_SUMMON_RAKSHASA, "Summon Rakshasa")
@@ -4673,7 +4748,16 @@ AXED_SPELL(SPELL_VAMPIRE_SUMMON, "Vampire Summon")
 AXED_SPELL(SPELL_WARP_BRAND, "Warp Weapon")
 AXED_SPELL(SPELL_WEAVE_SHADOWS, "Weave Shadows")
 AXED_SPELL(SPELL_STRIKING, "Striking")
-AXED_SPELL(SPELL_RESURRECT, "Resurrect")
+{
+    SPELL_RESURRECT, "Resurrect",
+    spschool::necromancy,
+    spflag::selfench | spflag::helpful | spflag::utility | spflag::no_ghost,
+    7,
+    200,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
 AXED_SPELL(SPELL_HOLY_WORD, "Holy word")
 AXED_SPELL(SPELL_SACRIFICE, "Sacrifice")
 AXED_SPELL(SPELL_MIASMA_CLOUD, "Miasma cloud")
@@ -4704,7 +4788,16 @@ AXED_SPELL(SPELL_BLADE_HANDS, "Blade Hands")
 AXED_SPELL(SPELL_STATUE_FORM, "Statue Form")
 AXED_SPELL(SPELL_STORM_FORM, "Storm Form")
 AXED_SPELL(SPELL_DRAGON_FORM, "Dragon Form")
-AXED_SPELL(SPELL_NECROMUTATION, "Necromutation")
+{
+    SPELL_NECROMUTATION, "Necromutation",
+    spschool::necromancy,
+    spflag::selfench | spflag::utility | spflag::no_ghost,
+    8,
+    200,
+    -1, -1,
+    0,
+    TILEG_ERROR,
+},
 AXED_SPELL(SPELL_AWAKEN_EARTH, "Awaken Earth")
 AXED_SPELL(SPELL_ANIMATE_SKELETON, "Animate Skeleton")
 #endif

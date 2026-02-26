@@ -2378,3 +2378,44 @@ destructive mutagenic radiation. The victim and anyone adjacent will be
 blasted and heavily deformed, weakening them and reducing their armour.
 Summoned creatures are particularly vulnerable, as the enchantments binding
 them to this plane will unravel and cause them to be dismissed immediately.
+%%%%
+Flight spell
+
+Lets the caster fly for a time, allowing safe traversal over deep water and
+lava.
+%%%%
+See Invisible spell
+
+Sharpens the caster's sight, allowing them to see invisible creatures.
+%%%%
+Cure Poison spell
+
+Purges poison from the caster's body.
+%%%%
+Regeneration spell
+
+Speeds the caster's natural healing for a short duration.
+%%%%
+Resistance spell
+
+Grants resistance to fire and cold. The strength and duration scale with your Fire Magic and Ice Magic skills.
+%%%%
+Augment spell
+
+Temporarily augments your Strength, Intelligence, and Dexterity by up to +15. Duration varies with spell power.
+%%%%
+Stoneskin spell
+
+Hardens the caster's skin into stone, increasing armour class for a time.
+%%%%
+Necromutation spell
+
+Transforms the caster into a deathly undead form for a limited duration.
+%%%%
+Resurrect spell
+
+Calls necromantic power to raise nearby corpses as allied undead.
+%%%%
+Darkness spell
+
+Envelops the caster in darkness, reducing their line of sight.
