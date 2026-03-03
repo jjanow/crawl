@@ -1362,6 +1362,9 @@ static int _spell_base_weight(spell_type spell)
     case SPELL_BLINK:
         return 170;
 
+    case SPELL_TELEPORTATION:
+        return 150;
+
     case SPELL_SUBLIMATION_OF_BLOOD:
         return 150;
 

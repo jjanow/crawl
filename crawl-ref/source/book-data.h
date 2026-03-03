@@ -84,6 +84,7 @@ static const vector<spell_type> spellbook_templates[] =
 
 {   // Book of Spatial Translocations
     SPELL_BLINK,
+    SPELL_TELEPORTATION,
     SPELL_MOMENTUM_STRIKE,
     SPELL_BECKONING,
 },
@@ -462,6 +463,7 @@ static const vector<spell_type> spellbook_templates[] =
 { // There-And-Back Book
     SPELL_TELEPORT_OTHER,
     SPELL_CONTROLLED_BLINK,
+    SPELL_TELEPORTATION,
     SPELL_GELLS_GAVOTTE,
     SPELL_DISPERSAL,
 },

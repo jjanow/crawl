@@ -523,6 +523,17 @@ static const struct spell_desc spelldata[] =
 },
 
 {
+    SPELL_TELEPORTATION, "Teleportation",
+    spschool::translocation,
+    spflag::escape | spflag::selfench,
+    3,
+    50,
+    -1, -1,
+    0,
+    TILEG_TELEPORT_OTHER,
+},
+
+{
     SPELL_BLINK_RANGE, "Blink Range", // XXX needs better name
     spschool::translocation,
     spflag::escape | spflag::monster | spflag::selfench,

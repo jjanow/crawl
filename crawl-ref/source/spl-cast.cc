@@ -1326,6 +1326,8 @@ unique_ptr<targeter> find_spell_targeter(spell_type spell, int pow, int range)
 
     case SPELL_BLINK:
         return make_unique<targeter_multiposition>(&you, find_blink_targets());
+    case SPELL_TELEPORTATION:
+        return make_unique<targeter_radius>(&you, LOS_SOLID_SEE, 0);
     case SPELL_MANIFOLD_ASSAULT:
         return make_unique<targeter_multiposition>(&you,
                                                    _simple_find_all_hostiles());
@@ -2567,6 +2569,9 @@ static spret _do_cast(spell_type spell, int powc, const dist& spd,
     // Escape spells.
     case SPELL_BLINK:
         return cast_blink(powc, fail);
+
+    case SPELL_TELEPORTATION:
+        return cast_teleportation(fail);
 
     case SPELL_CONTROLLED_BLINK:
     {

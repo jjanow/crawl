@@ -1291,6 +1291,13 @@ string spell_uselessness_reason(spell_type spell, bool temp, bool prevent,
             return lowercase_first(you.no_tele_reason(true));
         break;
 
+    case SPELL_TELEPORTATION:
+        if (you.stasis())
+            return "your stasis prevents you from teleporting.";
+        if (temp && you.no_tele())
+            return lowercase_first(you.no_tele_reason());
+        break;
+
     case SPELL_SWIFTNESS:
         if (you.stasis())
             return "your stasis precludes magical swiftness.";

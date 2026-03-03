@@ -648,5 +648,6 @@ enum spell_type : int
     SPELL_ACID_BALL,
     SPELL_AUGMENT,
     SPELL_RESISTANCE,
+    SPELL_TELEPORTATION,
     NUM_SPELLS
 };

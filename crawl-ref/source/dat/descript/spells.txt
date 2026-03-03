@@ -170,6 +170,11 @@ Randomly translocates the caster a short distance. After translocating in this
 way, the spell cannot be cast again for a short period of time depending on
 spell power.
 %%%%
+Teleportation spell
+
+Translocates the caster to a random position on the level, functioning like a
+scroll of teleportation.
+%%%%
 Blinkbolt spell
 
 Transforms the caster into a lightning bolt, and translocates the caster to

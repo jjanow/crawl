@@ -956,6 +956,25 @@ spret cast_blink(int pow, bool fail)
     return spret::success;
 }
 
+/**
+ * Cast the player spell Teleportation.
+ * Functions like the scroll of teleportation: translocates the caster to a
+ * random position on the level.
+ *
+ * @param fail              Whether the player miscast the spell.
+ * @return                  Whether the spell was successfully cast, aborted,
+ *                          or miscast.
+ */
+spret cast_teleportation(bool fail)
+{
+    if (you.no_tele())
+        return fail ? spret::fail : spret::success;
+
+    fail_check();
+    you_teleport();
+    return spret::success;
+}
+
 void you_teleport()
 {
     // [Cha] here we block teleportation, which will save the player from

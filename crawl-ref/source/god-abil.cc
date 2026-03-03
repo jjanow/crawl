@@ -3028,6 +3028,7 @@ bool valid_marionette_spell(spell_type spell)
         case SPELL_BLINK_AWAY:
         case SPELL_BLINK_CLOSE:
         case SPELL_BLINK_RANGE:
+        case SPELL_TELEPORTATION:
         case SPELL_WIND_BLAST:
         case SPELL_DIMENSION_ANCHOR:
         case SPELL_INK_CLOUD:
