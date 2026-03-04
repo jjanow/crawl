@@ -1,0 +1,14 @@
+---
+description: 
+alwaysApply: true
+---
+
+Do not add any reference to Cursor in any Git commit messages you create.
+# Build parallelism
+
+When building the game with `make` (or any Make-based build in this repo), always pass **`-j$(nproc)`** so the build uses all available CPU cores.
+
+- **Do**: `make -j$(nproc)` or `make -j$(nproc) debug`, etc.
+- **Do not**: use a fixed job count like `-j4`; that underutilizes multi-core machines.
+
+This applies to the main Crawl build from `crawl-ref/source/` and to any recursive or contrib builds that use make.

@@ -358,9 +358,9 @@ spret cast_augment(int power, bool fail)
     fail_check();
 
     // Stat bonus: scales from 1 to 15 based on power (cap 200)
-    const int bonus = min(15, 1 + div_rand_round(power * 14, 200));
-    // Duration: variable, reasonably long - 25 to 50+ turns
-    const int dur = 25 + random2avg(power, 2) + div_rand_round(power, 15);
+    const int bonus = min(15, 1 + div_rand_round(power * 14, 200)) + 5;
+    // Duration: variable, reasonably long
+    const int dur = 120 + random2avg(power, 2) + div_rand_round(power, 15);
 
     if (you.duration[DUR_AUGMENT])
         mpr("Your augmentation strengthens.");
