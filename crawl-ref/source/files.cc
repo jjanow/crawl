@@ -2039,6 +2039,8 @@ static void _rescue_player_from_wall()
 #if TAG_MAJOR_VERSION == 34
 static void _fixup_transmuters()
 {
+    // Only form spells that were removed and replaced by talismans. Necromutation
+    // was kept as a spell, so it must not be converted or unmemorized on load.
     vector<pair<spell_type, talisman_type>> forms = {
         { SPELL_BEASTLY_APPENDAGE, TALISMAN_QUILL },
         { SPELL_SPIDER_FORM,       TALISMAN_SPIDER },
@@ -2047,7 +2049,6 @@ static void _fixup_transmuters()
         { SPELL_STATUE_FORM,       TALISMAN_STATUE },
         { SPELL_DRAGON_FORM,       TALISMAN_DRAGON },
         { SPELL_STORM_FORM,        TALISMAN_STORM },
-        { SPELL_NECROMUTATION,     TALISMAN_DEATH },
     };
     for (auto &p : forms) {
         if (!you.has_spell(p.first))

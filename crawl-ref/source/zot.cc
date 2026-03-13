@@ -62,9 +62,10 @@ static int& _zot_clock()
     return _zot_clock_for(you.where_are_you);
 }
 
-static bool _zot_clock_active_in(branch_type br)
+static bool _zot_clock_active_in(branch_type /*br*/)
 {
-    return br != BRANCH_ABYSS && !zot_immune() && !crawl_state.game_is_sprint();
+    // Zot clock disabled: no time limit in branches.
+    return false;
 }
 
 // Is the zot clock running, or is it paused or stopped altogether?
